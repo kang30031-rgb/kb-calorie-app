@@ -1,0 +1,3215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaloriePal - แอปคำนวณแคลอรี่</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .main-app {
+            display: none;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* === CSS สำหรับ Autocomplete === */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .suggestion-item:hover, .suggestion-item.selected {
+            background-color: #f8f9ff;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .suggestion-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* === CSS สำหรับ Barcode Scanner === */
+        .barcode-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .scanner-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scanner-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        #barcode-scanner {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        /* === Firebase Status & Offline Notice === */
+        .firebase-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .firebase-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .firebase-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .firebase-status.syncing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .sync-spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .offline-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #856404;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scanner-status {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .scanner-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e9ecef 100%);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .food-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .food-info {
+            flex: 1;
+        }
+
+        .food-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .food-details {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 4px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .tab.active {
+            background: rgba(255,255,255,0.95);
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .meal-section {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .meal-section::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .meal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* === Chart Container Styles === */
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .chart-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .chart-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .weight-input-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .weight-input-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .weight-input-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .success {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .storage-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 20px auto;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: transparent;
+            stroke: #e9ecef;
+            stroke-width: 8;
+        }
+
+        .progress-ring-progress {
+            fill: transparent;
+            stroke: url(#gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 377;
+            stroke-dashoffset: 377;
+            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                font-size: 14px;
+                padding: 10px 8px;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            .weight-input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .fab {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+
+        /* Animation Classes */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-in-up {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Firebase Status -->
+    <div id="firebaseStatus" class="firebase-status disconnected">
+        <div class="sync-spinner"></div>
+        กำลังเชื่อมต่อ Firebase...
+    </div>
+
+    <!-- แจ้งเตือนเกี่ยวกับการจัดเก็บข้อมูล -->
+    <div id="storageWarning" class="storage-info" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; max-width: 600px; display: none;">
+        ⚠️ ข้อมูลของคุณจะถูกเก็บในเบราว์เซอร์นี้เท่านั้น หากลบข้อมูลเบราว์เซอร์หรือเปลี่ยนอุปกรณ์ ข้อมูลอาจหายไป
+        <button onclick="hideStorageWarning()" style="float: right; background: none; border: none; color: #856404; font-weight: bold; cursor: pointer;">×</button>
+    </div>
+
+    <!-- Barcode Scanner Modal -->
+    <div id="scannerModal" class="scanner-modal">
+        <div class="scanner-content">
+            <h3 style="margin-bottom: 15px;">สแกนบาร์โค้ดสินค้า</h3>
+            <div id="barcode-scanner"></div>
+            <div id="scanner-status" class="scanner-status" style="display: none;">
+                เริ่มต้นกล้อง...
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn btn-danger" onclick="closeBarcodeScanner()">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้าเข้าสู่ระบบ -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-card slide-in-up">
+            <h2 id="authTitle" style="text-align: center; margin-bottom: 30px; color: #667eea;">เข้าสู่ระบบ</h2>
+            
+            <div id="offlineNotice" class="offline-notice" style="display: none;">
+                📱 ใช้งานแบบออฟไลน์ - ข้อมูลจะบันทึกในอุปกรณ์เท่านั้น
+            </div>
+            
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">อีเมล</label>
+                    <input type="email" id="loginEmail" placeholder="กรอกอีเมล">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">รหัสผ่าน</label>
+                    <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน">
+                </div>
+                <div id="loginError" class="error" style="display: none;"></div>
+                <button class="btn" id="loginBtn" style="width: 100%; margin-bottom: 15px;" onclick="login()">เข้าสู่ระบบ</button>
+                <p style="text-align: center;">
+                    <a href="#" onclick="showForgotPassword()" style="color: #667eea; font-size: 14px;">ลืมรหัสผ่าน?</a>
+                </p>
+                <p style="text-align: center;">
+                    ยังไม่มีบัญชี? <a href="#" onclick="showRegister()" style="color: #667eea;">สมัครสมาชิก</a>
+                </p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label for="regName">ชื่อ</label>
+                    <input type="text" id="regName" placeholder="กรอกชื่อ">
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">อีเมล</label>
+                    <input type="email" id="regEmail" placeholder="กรอกอีเมล">
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">รหัสผ่าน</label>
+                    <input type="password" id="regPassword" placeholder="กรอกรหัสผ่าน">
+                </div>
+                
+                <!-- Security Questions Section -->
+                <h4 style="margin: 20px 0 15px 0; color: #667eea; font-size: 16px;">คำถามความปลอดภัย (เพื่อการกู้คืนรหัสผ่าน)</h4>
+
+                <div class="form-group">
+                    <label for="securityQ1">คำถามที่ 1: ชื่อเล่นของคุณในวัยเด็กคืออะไร?</label>
+                    <input type="text" id="securityQ1" placeholder="กรอกคำตอบ">
+                </div>
+
+                <div class="form-group">
+                    <label for="securityQ2">คำถามที่ 2: ชื่อโรงเรียนประถมของคุณคืออะไร?</label>
+                    <input type="text" id="securityQ2" placeholder="กรอกคำตอบ">
+                </div>
+
+                <div class="form-group">
+                    <label for="securityQ3">คำถามที่ 3: อาหารที่คุณชอบที่สุดคืออะไร?</label>
+                    <input type="text" id="securityQ3" placeholder="กรอกคำตอบ">
+                </div>
+                
+                <div id="registerError" class="error" style="display: none;"></div>
+                <button class="btn" id="registerBtn" style="width: 100%; margin-bottom: 15px;" onclick="register()">สมัครสมาชิก</button>
+                <p style="text-align: center;">
+                    มีบัญชีแล้ว? <a href="#" onclick="showLogin()" style="color: #667eea;">เข้าสู่ระบบ</a>
+                </p>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div id="forgotPasswordForm" class="hidden">
+                <div class="form-group">
+                    <label for="forgotEmail">อีเมล</label>
+                    <input type="email" id="forgotEmail" placeholder="กรอกอีเมลของคุณ">
+                </div>
+                <div id="forgotPasswordError" class="error" style="display: none;"></div>
+                <div id="forgotPasswordSuccess" class="success" style="display: none;"></div>
+                <button class="btn" id="forgotPasswordBtn" style="width: 100%; margin-bottom: 15px;" onclick="verifySecurityQuestions()">ตรวจสอบตัวตน</button>
+                <p style="text-align: center;">
+                    <a href="#" onclick="showLogin()" style="color: #667eea;">กลับไปหน้าเข้าสู่ระบบ</a>
+                </p>
+            </div>
+
+            <!-- Security Questions Verification Form -->
+            <div id="securityQuestionsForm" class="hidden">
+                <p style="text-align: center; margin-bottom: 20px; color: #666; font-size: 14px;">กรุณาตอบคำถามความปลอดภัยเพื่อยืนยันตัวตน</p>
+                <div id="securityQuestion1" class="form-group">
+                    <label id="question1Label">คำถามความปลอดภัยที่ 1</label>
+                    <input type="text" id="answer1" placeholder="กรอกคำตอบ">
+                </div>
+                <div id="securityQuestion2" class="form-group">
+                    <label id="question2Label">คำถามความปลอดภัยที่ 2</label>
+                    <input type="text" id="answer2" placeholder="กรอกคำตอบ">
+                </div>
+                <div id="securityQuestion3" class="form-group">
+                    <label id="question3Label">คำถามความปลอดภัยที่ 3</label>
+                    <input type="text" id="answer3" placeholder="กรอกคำตอบ">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">รหัสผ่านใหม่</label>
+                    <input type="password" id="newPassword" placeholder="กรอกรหัสผ่านใหม่">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+                    <input type="password" id="confirmPassword" placeholder="กรอกรหัสผ่านใหม่อีกครั้ง">
+                </div>
+                <div id="securityQuestionsError" class="error" style="display: none;"></div>
+                <div id="securityQuestionsSuccess" class="success" style="display: none;"></div>
+                <button class="btn" id="resetPasswordBtn" style="width: 100%; margin-bottom: 15px;" onclick="resetPassword()">รีเซ็ตรหัสผ่าน</button>
+                <p style="text-align: center;">
+                    <a href="#" onclick="showLogin()" style="color: #667eea; font-size: 14px;">ยกเลิก</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- แอปหลัก -->
+    <div id="mainApp" class="main-app">
+        <div class="container">
+            <!-- Header -->
+            <div class="header fade-in">
+                <div>
+                    <h1 style="color: #667eea;">CaloriePal</h1>
+                    <p id="welcomeText">ยินดีต้อนรับ</p>
+                </div>
+                <div>
+                    <button class="btn btn-secondary btn-small" onclick="showProfile()">โปรไฟล์</button>
+                    <button class="btn btn-danger btn-small" onclick="logout()">ออกจากระบบ</button>
+                </div>
+            </div>
+
+            <!-- สถิติรายวัน -->
+            <div class="card fade-in">
+                <h3 style="margin-bottom: 20px;">สรุปวันนี้</h3>
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="showTab('analytics')">
+                        <div class="stat-number" id="caloriesConsumed">0</div>
+                        <div class="stat-label">แคลอรี่ที่ทาน</div>
+                    </div>
+                    <div class="stat-card" onclick="showTab('analytics')">
+                        <div class="stat-number" id="caloriesRemaining">0</div>
+                        <div class="stat-label">แคลอรี่คงเหลือ</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="proteinConsumed">0g</div>
+                        <div class="stat-label">โปรตีน</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="sodiumConsumed">0mg</div>
+                        <div class="stat-label">โซเดียม</div>
+                    </div>
+                </div>
+
+                <!-- Progress Ring -->
+                <div class="progress-ring">
+                    <svg width="120" height="120">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#28a745;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#20c997;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="progress-ring-circle" cx="60" cy="60" r="50"></circle>
+                        <circle class="progress-ring-progress" id="progressRing" cx="60" cy="60" r="50"></circle>
+                    </svg>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <label>ความคืบหน้าแคลอรี่วันนี้</label>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="calorieProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('food')">บันทึกอาหาร</button>
+                <button class="tab" onclick="showTab('analytics')">📊 สถิติ</button>
+                <button class="tab" onclick="showTab('profile')">ข้อมูลส่วนตัว</button>
+                <button class="tab" onclick="showTab('history')">ประวัติ</button>
+            </div>
+
+            <!-- Tab: บันทึกอาหาร -->
+            <div id="foodTab" class="tab-content active">
+                <div class="grid">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px;">เพิ่มอาหาร</h3>
+                        <div class="form-group">
+                            <label for="mealType">มื้ออาหาร</label>
+                            <select id="mealType">
+                                <option value="breakfast">มื้อเช้า</option>
+                                <option value="lunch">มื้อกลางวัน</option>
+                                <option value="dinner">มื้อเย็น</option>
+                                <option value="snack">ขนมว่าง</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Smart Search with Autocomplete -->
+                        <div class="form-group">
+                            <label for="foodName">ชื่ออาหาร</label>
+                            <div class="autocomplete-container">
+                                <input type="text" id="foodName" placeholder="พิมพ์ชื่ออาหาร..." autocomplete="off">
+                                <div id="autocompleteSuggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                        </div>
+
+                        <!-- Barcode Scanner -->
+                        <div class="barcode-container">
+                            <button type="button" class="btn btn-secondary btn-icon" onclick="openBarcodeScanner()">
+                                📷 สแกนบาร์โค้ด
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foodAmount">จำนวน</label>
+                            <input type="number" id="foodAmount" placeholder="จำนวน" value="1" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="foodUnit">หน่วย</label>
+                            <select id="foodUnit">
+                                <option value="จาน">จาน</option>
+                                <option value="ฟอง">ฟอง</option>
+                                <option value="ตัว">ตัว</option>
+                                <option value="ชิ้น">ชิ้น</option>
+                                <option value="กรัม">กรัม</option>
+                                <option value="ช้อน">ช้อน</option>
+                                <option value="แก้ว">แก้ว</option>
+                                <option value="ชาม">ชาม</option>
+                                <option value="ไม้">ไม้</option>
+                                <option value="กระป๋อง">กระป๋อง</option>
+                                <option value="กล่อง">กล่อง</option>
+                                <option value="ถ้วย">ถ้วย</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="manualCalories">แคลอรี่ (หากทราบ)</label>
+                            <input type="number" id="manualCalories" placeholder="ไม่ใส่ระบบจะคำนวดให้" step="0.1">
+                        </div>
+                        <button class="btn" onclick="addFood()">เพิ่มอาหาร</button>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px;">รายการอาหารวันนี้</h3>
+                        
+                        <div class="meal-section">
+                            <div class="meal-title">🌅 มื้อเช้า</div>
+                            <div id="breakfastList"></div>
+                        </div>
+
+                        <div class="meal-section">
+                            <div class="meal-title">☀️ มื้อกลางวัน</div>
+                            <div id="lunchList"></div>
+                        </div>
+
+                        <div class="meal-section">
+                            <div class="meal-title">🌙 มื้อเย็น</div>
+                            <div id="dinnerList"></div>
+                        </div>
+
+                        <div class="meal-section">
+                            <div class="meal-title">🍿 ขนมว่าง</div>
+                            <div id="snackList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Analytics/Statistics -->
+            <div id="analyticsTab" class="tab-content">
+                <!-- Weight Tracking Section -->
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">📈 ติดตามน้ำหนัก</h3>
+                    <div class="weight-input-section">
+                        <div class="weight-input-row">
+                            <div class="form-group">
+                                <label for="weightDate">วันที่</label>
+                                <input type="date" id="weightDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="currentWeight">น้ำหนัก (กก.)</label>
+                                <input type="number" id="currentWeight" step="0.1" placeholder="น้ำหนักปัจจุบัน">
+                            </div>
+                            <button class="btn btn-success" onclick="addWeightEntry()">บันทึก</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-title">กราฟแนวโน้มน้ำหนัก</div>
+                        <div class="chart-wrapper">
+                            <canvas id="weightChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calorie Analytics -->
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">📊 วิเคราะห์แคลอรี่</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-period="week" onclick="changeCaloriePeriod('week')">7 วัน</button>
+                        <button class="chart-btn" data-period="month" onclick="changeCaloriePeriod('month')">30 วัน</button>
+                        <button class="chart-btn" data-period="3months" onclick="changeCaloriePeriod('3months')">3 เดือน</button>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-title">การบริโภคแคลอรี่ต่อวัน</div>
+                        <div class="chart-wrapper">
+                            <canvas id="calorieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Tracking -->
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">🎯 ความคืบหน้าเป้าหมาย</h3>
+                    <div class="grid">
+                        <div class="chart-container">
+                            <div class="chart-title">ความคืบหน้าน้ำหนัก</div>
+                            <div class="chart-wrapper">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 20px;">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="currentWeightStat">0</div>
+                                    <div class="stat-label">น้ำหนักปัจจุบัน (กก.)</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="targetWeightStat">0</div>
+                                    <div class="stat-label">เป้าหมาย (กก.)</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="weightDiffStat">0</div>
+                                    <div class="stat-label">ต้องลด/เพิ่ม (กก.)</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="avgCaloriesStat">0</div>
+                                    <div class="stat-label">เฉลี่ยแคลอรี่/วัน</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Breakdown -->
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">🥗 วิเคราะห์สารอาหาร</h3>
+                    <div class="chart-container">
+                        <div class="chart-title">สัดส่วนสารอาหารรายวัน</div>
+                        <div class="chart-wrapper">
+                            <canvas id="nutritionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: ข้อมูลส่วนตัว -->
+            <div id="profileTab" class="tab-content">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">ข้อมูลส่วนตัวและเป้าหมาย</h3>
+                    <div class="grid">
+                        <div>
+                            <div class="form-group">
+                                <label for="age">อายุ (ปี)</label>
+                                <input type="number" id="age" placeholder="อายุ">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">เพศ</label>
+                                <select id="gender">
+                                    <option value="male">ชาย</option>
+                                    <option value="female">หญิง</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="height">ส่วนสูง (ซม.)</label>
+                                <input type="number" id="height" placeholder="ส่วนสูง">
+                            </div>
+                            <div class="form-group">
+                                <label for="weight">น้ำหนักปัจจุบัน (กก.)</label>
+                                <input type="number" id="weight" placeholder="น้ำหนักปัจจุบัน" step="0.1">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label for="activity">ระดับการออกกำลังกาย</label>
+                                <select id="activity">
+                                    <option value="1.2">นั่งทำงาน ไม่ค่อยขยับ</option>
+                                    <option value="1.375">ออกกำลังกายเบาๆ 1-3 วัน/สัปดาห์</option>
+                                    <option value="1.55">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
+                                    <option value="1.725">ออกกำลังกายหนัก 6-7 วัน/สัปดาห์</option>
+                                    <option value="1.9">ออกกำลังกายหนักมาก/งานใช้แรง</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="goal">เป้าหมาย</label>
+                                <select id="goal">
+                                    <option value="-0.5">ลดน้ำหนัก 0.5 กก./สัปดาห์</option>
+                                    <option value="-0.25">ลดน้ำหนัก 0.25 กก./สัปดาห์</option>
+                                    <option value="0">รักษาน้ำหนัก</option>
+                                    <option value="0.25">เพิ่มน้ำหนัก 0.25 กก./สัปดาห์</option>
+                                    <option value="0.5">เพิ่มน้ำหนัก 0.5 กก./สัปดาห์</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="targetWeight">น้ำหนักเป้าหมาย (กก.)</label>
+                                <input type="number" id="targetWeight" placeholder="น้ำหนักที่ต้องการ" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="updateProfile()">อัปเดตข้อมูล</button>
+                    
+                    <div id="tdeeResult" style="margin-top: 20px; display: none;">
+                        <h4>ผลการคำนวด TDEE</h4>
+                        <div class="stats-grid" style="margin-top: 15px;">
+                            <div class="stat-card">
+                                <div class="stat-number" id="bmrValue">0</div>
+                                <div class="stat-label">BMR (kcal/วัน)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="tdeeValue">0</div>
+                                <div class="stat-label">TDEE (kcal/วัน)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="targetCalories">0</div>
+                                <div class="stat-label">เป้าหมายแคลอรี่/วัน</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="bmiValue">0</div>
+                                <div class="stat-label">BMI</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: ประวัติ -->
+            <div id="historyTab" class="tab-content">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">ประวัติการทานอาหาร</h3>
+                    <div id="historyList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="quickAddFood()" title="เพิ่มอาหารด่วน">+</button>
+    </div>
+
+    <!-- Include required libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- Firebase Module Script -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            updateProfile
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            updateDoc,
+            onSnapshot,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQw_1I9wnQrrd0h6HwnX_l3f2VZz-Y1bA",
+            authDomain: "kbcal2.firebaseapp.com",
+            projectId: "kbcal2",
+            storageBucket: "kbcal2.firebasestorage.app",
+            messagingSenderId: "991657721252",
+            appId: "1:991657721252:web:c3d66fc7b9f08914011531",
+            measurementId: "G-9XQ3LJN9EG"
+        };
+
+        let app, auth, db, currentUser = null, isFirebaseConnected = false;
+
+        // Initialize Firebase
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isFirebaseConnected = true;
+            updateFirebaseStatus('connected');
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            isFirebaseConnected = false;
+            updateFirebaseStatus('disconnected');
+            showOfflineMode();
+        }
+
+        function updateFirebaseStatus(status) {
+            const statusEl = document.getElementById('firebaseStatus');
+            if (!statusEl) return;
+            
+            statusEl.className = 'firebase-status ' + status;
+            switch(status) {
+                case 'connected':
+                    statusEl.innerHTML = '✅ เชื่อมต่อ Firebase แล้ว';
+                    break;
+                case 'disconnected':
+                    statusEl.innerHTML = '❌ โหมดออฟไลน์';
+                    break;
+                case 'syncing':
+                    statusEl.innerHTML = '<div class="sync-spinner"></div> กำลังซิงค์...';
+                    break;
+            }
+        }
+
+        function showOfflineMode() {
+            const offlineEl = document.getElementById('offlineNotice');
+            if (offlineEl) offlineEl.style.display = 'block';
+        }
+
+        // Firebase Authentication Functions
+        async function firebaseLogin(email, password) {
+            if (!isFirebaseConnected) {
+                // Offline fallback
+                const storedData = getFromStorage();
+                if (storedData.users && storedData.users[email] && 
+                    storedData.users[email].password === password) {
+                    currentUser = email;
+                    window.currentUser = currentUser;
+                    window.userData = storedData.users || {};
+                    window.dailyFoodLog = storedData.dailyLog || {};
+                    window.weightLog = storedData.weightLog || {};
+                    enterAppLocal();
+                    return;
+                }
+                throw new Error('Invalid credentials');
+            }
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                currentUser = userCredential.user.uid;
+                window.currentUser = currentUser;
+                await loadFromFirebase();
+                enterAppLocal();
+                await syncToFirestore();
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function firebaseRegister(email, password, displayName, securityQuestions = null) {
+            if (!isFirebaseConnected) {
+                // Offline fallback
+                const storedData = getFromStorage();
+                if (storedData.users && storedData.users[email]) {
+                    throw new Error('Email already exists');
+                }
+                
+                if (!window.userData) window.userData = {};
+                window.userData[email] = {
+                    name: displayName,
+                    password: password,
+                    profile: getDefaultProfile(),
+                    securityQuestions: securityQuestions || {}
+                };
+                
+                currentUser = email;
+                window.currentUser = currentUser;
+                saveToStorage();
+                enterAppLocal();
+                return;
+            }
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                if (displayName) {
+                    await updateProfile(userCredential.user, { displayName: displayName });
+                }
+                
+                currentUser = userCredential.user.uid;
+                window.currentUser = currentUser;
+                
+                // Initialize user data
+                if (!window.userData) window.userData = {};
+                window.userData[currentUser] = {
+                    name: displayName,
+                    profile: getDefaultProfile(),
+                    securityQuestions: securityQuestions || {}
+                };
+                
+                await syncToFirestore();
+                enterAppLocal();
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function firebaseLogout() {
+            try {
+                if (isFirebaseConnected && auth) {
+                    await signOut(auth);
+                }
+                currentUser = null;
+                window.currentUser = null;
+                showAuthPage();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Auth state observer
+        if (isFirebaseConnected) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user.uid;
+                    window.currentUser = currentUser;
+                    await loadFromFirebase();
+                    enterAppLocal();
+                } else {
+                    currentUser = null;
+                    window.currentUser = null;
+                    showAuthPage();
+                }
+            });
+        } else {
+            // Fallback for offline mode
+            const stored = getFromStorage();
+            if (stored.currentUser) {
+                currentUser = stored.currentUser;
+                window.currentUser = currentUser;
+                window.userData = stored.users || {};
+                window.dailyFoodLog = stored.dailyLog || {};
+                window.weightLog = stored.weightLog || {};
+                enterAppLocal();
+            } else {
+                showAuthPage();
+            }
+        }
+
+        // Data synchronization with improved error handling
+        async function syncToFirestore() {
+            if (!isFirebaseConnected || !currentUser) return;
+            
+            try {
+                updateFirebaseStatus('syncing');
+                const userDoc = doc(db, 'users', currentUser);
+                const syncData = {
+                    userData: window.userData || {},
+                    dailyFoodLog: window.dailyFoodLog || {},
+                    weightLog: window.weightLog || {},
+                    lastSync: serverTimestamp()
+                };
+                
+                await setDoc(userDoc, syncData, { merge: true });
+                updateFirebaseStatus('connected');
+                console.log('Data synced to Firebase');
+                
+                // Also save to local storage as backup
+                saveToStorage();
+            } catch (error) {
+                console.error('Sync error:', error);
+                updateFirebaseStatus('connected');
+            }
+        }
+
+        async function loadFromFirebase() {
+            if (!isFirebaseConnected || !currentUser) return;
+            
+            try {
+                const userDoc = doc(db, 'users', currentUser);
+                const docSnap = await getDoc(userDoc);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // Merge Firebase data with local data (local takes precedence)
+                    const localData = getFromStorage();
+                    
+                    window.userData = { ...data.userData, ...localData.users } || {};
+                    window.dailyFoodLog = { ...data.dailyFoodLog, ...localData.dailyLog } || {};
+                    window.weightLog = { ...data.weightLog, ...localData.weightLog } || {};
+                    
+                    console.log('Data loaded from Firebase and merged with local');
+                    
+                    // Save merged data back to storage
+                    saveToStorage();
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                // Load from local storage as fallback
+                const localData = getFromStorage();
+                window.userData = localData.users || {};
+                window.dailyFoodLog = localData.dailyLog || {};
+                window.weightLog = localData.weightLog || {};
+            }
+        }
+
+        // Make functions global
+        window.login = async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (!email || !password) {
+                showError('loginError', 'กรุณากรอกอีเมลและรหัสผ่าน');
+                return;
+            }
+            
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<div class="loading"></div> กำลังเข้าสู่ระบบ...';
+            
+            try {
+                await firebaseLogin(email, password);
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('loginError', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'เข้าสู่ระบบ';
+            }
+        };
+
+        window.register = async function() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const securityQ1 = document.getElementById('securityQ1').value.trim();
+            const securityQ2 = document.getElementById('securityQ2').value.trim();
+            const securityQ3 = document.getElementById('securityQ3').value.trim();
+            const registerBtn = document.getElementById('registerBtn');
+            
+            if (!name || !email || !password || !securityQ1 || !securityQ2 || !securityQ3) {
+                showError('registerError', 'กรุณากรอกข้อมูลให้ครบถ้วนรวมทั้งคำถามความปลอดภัย');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showError('registerError', 'รูปแบบอีเมลไม่ถูกต้อง');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('registerError', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+                return;
+            }
+            
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<div class="loading"></div> กำลังสมัครสมาชิก...';
+            
+            try {
+                await firebaseRegister(email, password, name, {
+                    q1: securityQ1.toLowerCase(),
+                    q2: securityQ2.toLowerCase(),
+                    q3: securityQ3.toLowerCase()
+                });
+            } catch (error) {
+                console.error('Register error:', error);
+                if (error.code === 'auth/email-already-in-use' || error.message === 'Email already exists') {
+                    showError('registerError', 'อีเมลนี้ถูกใช้แล้ว');
+                } else {
+                    showError('registerError', 'เกิดข้อผิดพลาดในการสมัครสมาชิก');
+                }
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = 'สมัครสมาชิก';
+            }
+        };
+
+        window.logout = firebaseLogout;
+
+        // Network event listeners
+        window.addEventListener('online', () => {
+            if (isFirebaseConnected && currentUser) {
+                syncToFirestore().catch(console.error);
+            }
+            const offlineEl = document.getElementById('offlineNotice');
+            if (offlineEl) offlineEl.style.display = 'none';
+        });
+
+        window.addEventListener('offline', () => {
+            const offlineEl = document.getElementById('offlineNotice');
+            if (offlineEl) offlineEl.style.display = 'block';
+            updateFirebaseStatus('disconnected');
+        });
+
+        // Utility functions
+        function getDefaultProfile() {
+            return {
+                age: 25,
+                gender: 'male',
+                height: 170,
+                weight: 70,
+                activity: 1.375,
+                goal: 0,
+                targetWeight: 70,
+                targetCalories: 2000
+            };
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function enterAppLocal() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            
+            // Update welcome text with user's actual name
+            let userName = 'ผู้ใช้';
+            if (window.userData && window.userData[currentUser]) {
+                userName = window.userData[currentUser].name || 'ผู้ใช้';
+            }
+            
+            const welcomeElement = document.getElementById('welcomeText');
+            if (welcomeElement) {
+                welcomeElement.textContent = `ยินดีต้อนรับ ${userName}`;
+            }
+            
+            // Load app data
+            if (window.loadProfile) window.loadProfile();
+            if (window.updateDailyStats) window.updateDailyStats();
+            if (window.loadFoodLog) window.loadFoodLog();
+            if (window.updateAllCharts) window.updateAllCharts();
+        }
+        function showAuthPage() {
+            document.getElementById('authContainer').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            window.showLogin();
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                setTimeout(() => {
+                    errorElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showSuccess(elementId, message) {
+            const successElement = document.getElementById(elementId);
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.style.display = 'block';
+                setTimeout(() => {
+                    successElement.style.display = 'none';
+                }, 8000);
+            }
+        }
+
+        // Improved storage functions with better error handling
+        function saveToStorage() {
+            const data = {
+                users: window.userData || {},
+                dailyLog: window.dailyFoodLog || {},
+                weightLog: window.weightLog || {},
+                currentUser: currentUser,
+                lastSave: new Date().toISOString()
+            };
+            
+            try {
+                localStorage.setItem('calorieAppData', JSON.stringify(data));
+                console.log('Data saved to localStorage');
+            } catch (e) {
+                console.error('Cannot save to localStorage:', e);
+                // Try to save critical data only
+                try {
+                    const criticalData = {
+                        users: window.userData || {},
+                        currentUser: currentUser
+                    };
+                    localStorage.setItem('calorieAppCritical', JSON.stringify(criticalData));
+                } catch (criticalError) {
+                    console.error('Cannot save even critical data:', criticalError);
+                }
+            }
+        }
+
+        function getFromStorage() {
+            try {
+                const stored = localStorage.getItem('calorieAppData');
+                if (stored) {
+                    return JSON.parse(stored);
+                }
+                
+                // Fallback to critical data
+                const critical = localStorage.getItem('calorieAppCritical');
+                if (critical) {
+                    const criticalData = JSON.parse(critical);
+                    return {
+                        users: criticalData.users || {},
+                        dailyLog: {},
+                        weightLog: {},
+                        currentUser: criticalData.currentUser
+                    };
+                }
+                
+                return {};
+            } catch (e) {
+                console.error('Cannot load from localStorage:', e);
+                return {};
+            }
+        }
+
+        // Security Questions and Password Reset functionality
+        let securityData = {
+            email: '',
+            questions: {
+                q1: 'ชื่อเล่นของคุณในวัยเด็กคืออะไร?',
+                q2: 'ชื่อโรงเรียนประถมของคุณคืออะไร?',
+                q3: 'อาหารที่คุณชอบที่สุดคืออะไร?'
+            }
+        };
+
+        window.verifySecurityQuestions = async function() {
+            const emailEl = document.getElementById('forgotEmail');
+            if (!emailEl) return;
+            
+            const email = emailEl.value.trim();
+            const sendBtn = document.getElementById('forgotPasswordBtn');
+            
+            if (!email || !isValidEmail(email)) {
+                showError('forgotPasswordError', 'กรุณากรอกอีเมลให้ถูกต้อง');
+                return;
+            }
+            
+            // Check if user exists and has security questions
+            let userExists = false;
+            if (!isFirebaseConnected) {
+                const storedData = getFromStorage();
+                if (storedData.users && storedData.users[email] && storedData.users[email].securityQuestions) {
+                    userExists = true;
+                }
+            } else {
+                userExists = true;
+            }
+            
+            if (!userExists) {
+                showError('forgotPasswordError', 'ไม่พบบัญชีผู้ใช้ด้วยอีเมลนี้หรือไม่มีคำถามความปลอดภัย');
+                return;
+            }
+            
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<div class="loading"></div> กำลังตรวจสอบ...';
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                securityData.email = email;
+                
+                showSuccess('forgotPasswordSuccess', `กรุณาตอบคำถามความปลอดภัยเพื่อยืนยันตัวตน`);
+                
+                setTimeout(() => {
+                    showSecurityQuestionsForm();
+                    loadUserSecurityQuestions(email);
+                }, 2000);
+                
+            } catch (error) {
+                showError('forgotPasswordError', 'เกิดข้อผิดพลาดในการตรวจสอบ');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'ตรวจสอบตัวตน';
+            }
+        };
+
+        function loadUserSecurityQuestions(email) {
+            const q1Label = document.getElementById('question1Label');
+            const q2Label = document.getElementById('question2Label');
+            const q3Label = document.getElementById('question3Label');
+            
+            if (q1Label) q1Label.textContent = securityData.questions.q1;
+            if (q2Label) q2Label.textContent = securityData.questions.q2;
+            if (q3Label) q3Label.textContent = securityData.questions.q3;
+        }
+
+        function clearSecurityData() {
+            securityData = {
+                email: '',
+                questions: {
+                    q1: 'ชื่อเล่นของคุณในวัยเด็กคืออะไร?',
+                    q2: 'ชื่อโรงเรียนประถมของคุณคืออะไร?',
+                    q3: 'อาหารที่คุณชอบที่สุดคืออะไร?'
+                }
+            };
+        }
+
+        function showSecurityQuestionsForm() {
+            document.getElementById('authTitle').textContent = 'ตอบคำถามความปลอดภัย';
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('forgotPasswordForm').classList.add('hidden');
+            document.getElementById('securityQuestionsForm').classList.remove('hidden');
+            clearAuthForms();
+        }
+
+        window.resetPassword = async function() {
+            const answer1El = document.getElementById('answer1');
+            const answer2El = document.getElementById('answer2');
+            const answer3El = document.getElementById('answer3');
+            const newPasswordEl = document.getElementById('newPassword');
+            const confirmPasswordEl = document.getElementById('confirmPassword');
+            const resetBtn = document.getElementById('resetPasswordBtn');
+            
+            if (!answer1El || !answer2El || !answer3El || !newPasswordEl || !confirmPasswordEl) return;
+            
+            const answer1 = answer1El.value.trim().toLowerCase();
+            const answer2 = answer2El.value.trim().toLowerCase();
+            const answer3 = answer3El.value.trim().toLowerCase();
+            const newPassword = newPasswordEl.value;
+            const confirmPassword = confirmPasswordEl.value;
+            
+            if (!answer1 || !answer2 || !answer3) {
+                showError('securityQuestionsError', 'กรุณาตอบคำถามความปลอดภัยทั้งหมด');
+                return;
+            }
+            
+            if (!newPassword || newPassword.length < 6) {
+                showError('securityQuestionsError', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showError('securityQuestionsError', 'รหัสผ่านไม่ตรงกัน');
+                return;
+            }
+            
+            resetBtn.disabled = true;
+            resetBtn.innerHTML = '<div class="loading"></div> กำลังตรวจสอบ...';
+            
+            try {
+                let isVerified = false;
+                
+                if (!isFirebaseConnected) {
+                    const storedData = getFromStorage();
+                    const userSecurityQuestions = storedData.users?.[securityData.email]?.securityQuestions;
+                    
+                    if (userSecurityQuestions && 
+                        userSecurityQuestions.q1 === answer1 &&
+                        userSecurityQuestions.q2 === answer2 &&
+                        userSecurityQuestions.q3 === answer3) {
+                        isVerified = true;
+                        
+                        storedData.users[securityData.email].password = newPassword;
+                        localStorage.setItem('calorieAppData', JSON.stringify(storedData));
+                    }
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    isVerified = true;
+                }
+                
+                if (!isVerified) {
+                    showError('securityQuestionsError', 'คำตอบของคำถามความปลอดภัยไม่ถูกต้อง');
+                    return;
+                }
+                
+                showSuccess('securityQuestionsSuccess', 'รีเซ็ตรหัสผ่านสำเร็จ!');
+                clearSecurityData();
+                
+                setTimeout(() => {
+                    showLogin();
+                    alert('รีเซ็ตรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่');
+                }, 2000);
+                
+            } catch (error) {
+                showError('securityQuestionsError', 'เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
+            } finally {
+                resetBtn.disabled = false;
+                resetBtn.innerHTML = 'รีเซ็ตรหัสผ่าน';
+            }
+        };
+
+        function showForgotPassword() {
+            document.getElementById('authTitle').textContent = 'ลืมรหัสผ่าน';
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('securityQuestionsForm').classList.add('hidden');
+            document.getElementById('forgotPasswordForm').classList.remove('hidden');
+            clearAuthForms();
+        }
+
+        function showLogin() {
+            document.getElementById('authTitle').textContent = 'เข้าสู่ระบบ';
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('forgotPasswordForm').classList.add('hidden');
+            document.getElementById('securityQuestionsForm').classList.add('hidden');
+            clearAuthForms();
+            clearSecurityData();
+        }
+
+        function showRegister() {
+            document.getElementById('authTitle').textContent = 'สมัครสมาชิก';
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('forgotPasswordForm').classList.add('hidden');
+            document.getElementById('securityQuestionsForm').classList.add('hidden');
+            clearAuthForms();
+            clearSecurityData();
+        }
+
+        function clearAuthForms() {
+            const inputs = [
+                'loginEmail', 'loginPassword', 'regName', 'regEmail', 'regPassword',
+                'securityQ1', 'securityQ2', 'securityQ3', 'forgotEmail', 
+                'answer1', 'answer2', 'answer3', 'newPassword', 'confirmPassword'
+            ];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            
+            const errors = [
+                'loginError', 'registerError', 'forgotPasswordError', 'securityQuestionsError'
+            ];
+            errors.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            
+            const successes = ['forgotPasswordSuccess', 'securityQuestionsSuccess'];
+            successes.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+
+        // Make utility functions global
+        window.saveToStorage = saveToStorage;
+        window.getFromStorage = getFromStorage;
+        window.syncToFirestore = syncToFirestore;
+        window.showForgotPassword = showForgotPassword;
+        window.showSecurityQuestionsForm = showSecurityQuestionsForm;
+        window.verifySecurityQuestions = verifySecurityQuestions;
+        window.showLogin = showLogin;
+        window.showRegister = showRegister;
+    </script>
+    
+    <script>
+        // ข้อมูลผู้ใช้และระบบ - ปรับปรุงการจัดการข้อมูล
+        let userData = {};
+        let dailyFoodLog = {};
+        let weightLog = {};
+        let selectedSuggestionIndex = -1;
+        let charts = {};
+
+        // ฐานข้อมูลอาหารพื้นฐาน - ขยายเพิ่มเติม
+        const foodDatabase = {
+            'ข้าวผัด': { calories: 250, protein: 8, sodium: 800, unit: 'จาน' },
+            'ไข่ต้ม': { calories: 70, protein: 6, sodium: 70, unit: 'ฟอง' },
+            'อกไก่ต้ม': { calories: 120, protein: 26, sodium: 60, unit: 'ชิ้น' },
+            'ไข่ดาว': { calories: 90, protein: 6, sodium: 90, unit: 'ฟอง' },
+            'ไข่เจียว': { calories: 180, protein: 8, sodium: 150, unit: 'ชิ้น' },
+            'ไข่เจียวหมูสับ': { calories: 220, protein: 12, sodium: 200, unit: 'ฟอง' },
+            'ไข่พะโล้': { calories: 150, protein: 8, sodium: 300, unit: 'ฟอง' },
+            'ไข่ลวก': { calories: 70, protein: 6, sodium: 70, unit: 'ฟอง' },
+            'ก๋วยเตี๋ยว': { calories: 300, protein: 15, sodium: 1200, unit: 'ชาม' },
+            'ผัดไทย': { calories: 400, protein: 12, sodium: 900, unit: 'จาน' },
+            'ไก่ย่าง': { calories: 200, protein: 35, sodium: 300, unit: 'ชิ้น' },
+            'หมูปิ้ง': { calories: 250, protein: 20, sodium: 400, unit: 'ไม้' },
+            'ส้มตำ': { calories: 120, protein: 5, sodium: 600, unit: 'จาน' },
+            'ปลาแซลมอนนึ่ง': { calories: 180, protein: 20, sodium: 50, unit: 'จาน' },
+            'แกงเขียวหวาน': { calories: 280, protein: 18, sodium: 800, unit: 'จาน' },
+            'ต้มยำกุ้ง': { calories: 200, protein: 20, sodium: 1000, unit: 'ชาม' },
+            'ข้าวเปล่า': { calories: 130, protein: 3, sodium: 0, unit: 'จาน' },
+            'ข้าวโพด': { calories: 90, protein: 3, sodium: 15, unit: 'แก้ว' },
+            'กล้วยหอม': { calories: 90, protein: 1, sodium: 1, unit: 'ตัว' },
+            'แอปเปิ้ล': { calories: 80, protein: 0, sodium: 2, unit: 'ตัว' },
+            'ส้ม': { calories: 60, protein: 1, sodium: 0, unit: 'ตัว' },
+            'มะม่วง': { calories: 100, protein: 1, sodium: 2, unit: 'ตัว' },
+            'น้ำปลา': { calories: 10, protein: 2, sodium: 1500, unit: 'ช้อน' },
+            'น้ำตาล': { calories: 50, protein: 0, sodium: 0, unit: 'ช้อน' },
+            'นม': { calories: 60, protein: 3, sodium: 50, unit: 'แก้ว' },
+            'นมถั่วเหลือง': { calories: 80, protein: 7, sodium: 90, unit: 'แก้ว' },
+            'กาแฟดำ': { calories: 5, protein: 0, sodium: 5, unit: 'แก้ว' },
+            'ชาเขียว': { calories: 2, protein: 0, sodium: 1, unit: 'แก้ว' },
+            'น้ำเปล่า': { calories: 0, protein: 0, sodium: 0, unit: 'แก้ว' },
+            'ข้าวต้มไก่': { calories: 200, protein: 15, sodium: 600, unit: 'ชาม' },
+            'โจ๊ก': { calories: 150, protein: 8, sodium: 400, unit: 'ชาม' },
+            'ขนมปัง': { calories: 80, protein: 3, sodium: 150, unit: 'ชิ้น' },
+            'ข้าวหมกไก่': { calories: 350, protein: 20, sodium: 900, unit: 'จาน' },
+            'ผักบุ้งไฟแดง': { calories: 80, protein: 3, sodium: 400, unit: 'จาน' },
+            'ลาบหมู': { calories: 200, protein: 18, sodium: 700, unit: 'จาน' },
+            'แกงส้มปลา': { calories: 150, protein: 15, sodium: 800, unit: 'ชาม' },
+            'ข้าวผัดกะเพรา': { calories: 400, protein: 15, sodium: 1000, unit: 'จาน' }
+        };
+
+        // Mock barcode database - ขยายเพิ่ม
+        const barcodeDatabase = {
+            '8851234567890': { name: 'มาม่าต้มยำกุ้ง', calories: 320, protein: 8, sodium: 1200, unit: 'ถ้วย' },
+            '8851234567891': { name: 'เนสเท่ มิโล', calories: 180, protein: 4, sodium: 80, unit: 'แก้ว' },
+            '8851234567892': { name: 'โค้กโซดา', calories: 140, protein: 0, sodium: 40, unit: 'กระป๋อง' },
+            '8851234567893': { name: 'ขนมปังโฮลวีท', calories: 80, protein: 3, sodium: 150, unit: 'ชิ้น' },
+            '8851234567894': { name: 'นมสดตราวี', calories: 150, protein: 8, sodium: 100, unit: 'กล่อง' },
+            '8851234567895': { name: 'ข้าวกล่องไก่ย่าง', calories: 450, protein: 25, sodium: 800, unit: 'กล่อง' },
+            '8851234567896': { name: 'นมเปรี้ยว', calories: 120, protein: 3, sodium: 60, unit: 'กล่อง' },
+            '8851234567897': { name: 'โยเกิร์ต', calories: 100, protein: 5, sodium: 70, unit: 'ถ้วย' },
+            '8851234567898': { name: 'แซนวิชไข่', calories: 280, protein: 12, sodium: 400, unit: 'ชิ้น' },
+            '8851234567899': { name: 'สลัดไก่', calories: 200, protein: 20, sodium: 300, unit: 'จาน' }
+        };
+
+        // ฟังก์ชันเริ่มต้น
+        function init() {
+            setupAutocomplete();
+            initializeCharts();
+            
+            // Set today's date for weight input
+            const today = new Date().toISOString().split('T')[0];
+            const weightDateEl = document.getElementById('weightDate');
+            if (weightDateEl) weightDateEl.value = today;
+            
+            // Auto-save every 30 seconds
+            setInterval(() => {
+                if (window.currentUser && window.saveToStorage) {
+                    window.saveToStorage();
+                }
+            }, 30000);
+        }
+
+        // === CHART INITIALIZATION ===
+        function initializeCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            };
+
+            // Weight Chart
+            const weightCtx = document.getElementById('weightChart');
+            if (weightCtx) {
+                charts.weight = new Chart(weightCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'น้ำหนัก (กก.)',
+                            data: [],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            pointBackgroundColor: '#667eea',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+
+            // Calorie Chart
+            const calorieCtx = document.getElementById('calorieChart');
+            if (calorieCtx) {
+                charts.calorie = new Chart(calorieCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'แคลอรี่ที่บริโภค',
+                            data: [],
+                            backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                            borderColor: '#28a745',
+                            borderWidth: 2
+                        }, {
+                            label: 'เป้าหมาย',
+                            data: [],
+                            type: 'line',
+                            borderColor: '#dc3545',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            pointRadius: 0
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+
+            // Progress Chart
+            const progressCtx = document.getElementById('progressChart');
+            if (progressCtx) {
+                charts.progress = new Chart(progressCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['บรรลุแล้ว', 'เหลืออีก'],
+                        datasets: [{
+                            data: [0, 100],
+                            backgroundColor: ['#28a745', '#e9ecef'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Nutrition Chart
+            const nutritionCtx = document.getElementById('nutritionChart');
+            if (nutritionCtx) {
+                charts.nutrition = new Chart(nutritionCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['คาร์โบไฮเดรต', 'โปรตีน', 'ไขมัน'],
+                        datasets: [{
+                            data: [50, 30, 20],
+                            backgroundColor: ['#667eea', '#28a745', '#ffc107'],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // === SMART SEARCH & AUTOCOMPLETE FUNCTIONALITY ===
+        function setupAutocomplete() {
+            const foodNameInput = document.getElementById('foodName');
+            const suggestionsDiv = document.getElementById('autocompleteSuggestions');
+
+            if (!foodNameInput || !suggestionsDiv) return;
+
+            foodNameInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase().trim();
+                if (query.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+                showSuggestions(query);
+            });
+
+            foodNameInput.addEventListener('keydown', function(e) {
+                const suggestions = suggestionsDiv.querySelectorAll('.suggestion-item');
+                if (suggestions.length === 0) return;
+
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
+                        updateSuggestionSelection(suggestions);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                        updateSuggestionSelection(suggestions);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (selectedSuggestionIndex >= 0) {
+                            selectSuggestion(suggestions[selectedSuggestionIndex]);
+                        }
+                        break;
+                    case 'Escape':
+                        hideSuggestions();
+                        break;
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!foodNameInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+        }
+
+        function showSuggestions(query) {
+            const suggestionsDiv = document.getElementById('autocompleteSuggestions');
+            const matches = findMatches(query);
+            
+            if (matches.length === 0) {
+                hideSuggestions();
+                return;
+            }
+
+            suggestionsDiv.innerHTML = matches.map((match, index) => `
+                <div class="suggestion-item" data-food-name="${match.name}" onclick="selectSuggestionByClick(this)">
+                    <div class="suggestion-name">${highlightMatch(match.name, query)}</div>
+                    <div class="suggestion-details">${match.calories} แคลอรี่, ${match.protein}g โปรตีน (${match.unit})</div>
+                </div>
+            `).join('');
+
+            suggestionsDiv.style.display = 'block';
+            selectedSuggestionIndex = -1;
+        }
+
+        function findMatches(query) {
+            const matches = [];
+            
+            // Exact matches first
+            for (const [name, data] of Object.entries(foodDatabase)) {
+                if (name.toLowerCase() === query) {
+                    matches.push({ name, ...data, score: 100 });
+                }
+            }
+            
+            // Starts with matches
+            for (const [name, data] of Object.entries(foodDatabase)) {
+                if (name.toLowerCase().startsWith(query) && name.toLowerCase() !== query) {
+                    matches.push({ name, ...data, score: 90 });
+                }
+            }
+            
+            // Contains matches
+            for (const [name, data] of Object.entries(foodDatabase)) {
+                if (name.toLowerCase().includes(query) && !name.toLowerCase().startsWith(query)) {
+                    matches.push({ name, ...data, score: 70 });
+                }
+            }
+            
+            return matches.sort((a, b) => b.score - a.score).slice(0, 5);
+        }
+
+        function highlightMatch(text, query) {
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<strong style="background: #fff3cd;">$1</strong>');
+        }
+
+        function updateSuggestionSelection(suggestions) {
+            suggestions.forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedSuggestionIndex);
+            });
+        }
+
+        function selectSuggestion(suggestionElement) {
+            const foodName = suggestionElement.getAttribute('data-food-name');
+            document.getElementById('foodName').value = foodName;
+            
+            // Auto-fill unit if available
+            if (foodDatabase[foodName]) {
+                const unitEl = document.getElementById('foodUnit');
+                if (unitEl) unitEl.value = foodDatabase[foodName].unit;
+            }
+            
+            hideSuggestions();
+        }
+
+        function selectSuggestionByClick(element) {
+            selectSuggestion(element);
+        }
+
+        function hideSuggestions() {
+            const suggestionsDiv = document.getElementById('autocompleteSuggestions');
+            if (suggestionsDiv) {
+                suggestionsDiv.style.display = 'none';
+            }
+            selectedSuggestionIndex = -1;
+        }
+
+        // === BARCODE SCANNER FUNCTIONALITY ===
+        function openBarcodeScanner() {
+            const modal = document.getElementById('scannerModal');
+            const statusDiv = document.getElementById('scanner-status');
+            
+            if (!modal || !statusDiv) return;
+            
+            modal.style.display = 'flex';
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = 'เริ่มต้นกล้อง...';
+            statusDiv.className = 'scanner-status';
+            
+            // Check if device supports camera
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                statusDiv.textContent = 'อุปกรณ์ไม่รองรับกล้อง';
+                statusDiv.className = 'scanner-status scanner-error';
+                return;
+            }
+
+            // Initialize Quagga scanner
+            if (typeof Quagga !== 'undefined') {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.querySelector('#barcode-scanner'),
+                        constraints: {
+                            width: 300,
+                            height: 200,
+                            facingMode: "environment"
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader",
+                            "ean_reader",
+                            "ean_8_reader",
+                            "code_39_reader"
+                        ]
+                    }
+                }, function(err) {
+                    if (err) {
+                        console.error('Barcode scanner error:', err);
+                        statusDiv.textContent = 'ไม่สามารถเปิดกล้องได้: ' + err.message;
+                        statusDiv.className = 'scanner-status scanner-error';
+                        return;
+                    }
+                    
+                    statusDiv.textContent = 'สแกนบาร์โค้ดได้แล้ว';
+                    statusDiv.className = 'scanner-status';
+                    Quagga.start();
+                });
+
+                // Handle barcode detection
+                Quagga.onDetected(function(result) {
+                    const code = result.codeResult.code;
+                    handleBarcodeResult(code);
+                    closeBarcodeScanner();
+                });
+            } else {
+                statusDiv.textContent = 'ไม่พบไลบรารี Barcode Scanner';
+                statusDiv.className = 'scanner-status scanner-error';
+            }
+        }
+
+        function closeBarcodeScanner() {
+            if (typeof Quagga !== 'undefined') {
+                Quagga.stop();
+            }
+            const modal = document.getElementById('scannerModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function handleBarcodeResult(barcode) {
+            if (barcodeDatabase[barcode]) {
+                const product = barcodeDatabase[barcode];
+                
+                // Auto-fill form with product data
+                const foodNameEl = document.getElementById('foodName');
+                const foodUnitEl = document.getElementById('foodUnit');
+                const manualCaloriesEl = document.getElementById('manualCalories');
+                
+                if (foodNameEl) foodNameEl.value = product.name;
+                if (foodUnitEl) foodUnitEl.value = product.unit;
+                if (manualCaloriesEl) manualCaloriesEl.value = product.calories;
+                
+                // Show success message
+                alert(`พบสินค้า: ${product.name}\nแคลอรี่: ${product.calories} kcal`);
+            } else {
+                // For demo purposes, show the barcode and let user enter manually
+                alert(`สแกนบาร์โค้ดสำเร็จ: ${barcode}\nไม่พบข้อมูลสินค้าในระบบ กรุณากรอกข้อมูลด้วยตนเอง`);
+                const foodNameEl = document.getElementById('foodName');
+                if (foodNameEl) foodNameEl.value = `สินค้าบาร์โค้ด ${barcode}`;
+            }
+        }
+
+        // === WEIGHT TRACKING FUNCTIONS ===
+        function addWeightEntry() {
+            const dateEl = document.getElementById('weightDate');
+            const weightEl = document.getElementById('currentWeight');
+            
+            if (!dateEl || !weightEl) return;
+            
+            const date = dateEl.value;
+            const weight = parseFloat(weightEl.value);
+
+            if (!date || !weight || weight <= 0) {
+                alert('กรุณากรอกวันที่และน้ำหนักให้ถูกต้อง');
+                return;
+            }
+
+            if (!window.weightLog) window.weightLog = {};
+            
+            // Use user-specific key for weight log
+            const userKey = window.currentUser || 'demo';
+            if (!window.weightLog[userKey]) {
+                window.weightLog[userKey] = {};
+            }
+            
+            window.weightLog[userKey][date] = weight;
+            
+            // Clear form
+            weightEl.value = '';
+            
+            // Save and update displays
+            if (window.saveToStorage) window.saveToStorage();
+            if (window.syncToFirestore) window.syncToFirestore();
+            
+            updateWeightChart();
+            updateProgressStats();
+            
+            alert('บันทึกน้ำหนักเรียบร้อยแล้ว');
+        }
+
+        function updateWeightChart() {
+            if (!charts.weight || !window.weightLog) return;
+            
+            const userKey = window.currentUser || 'demo';
+            const userWeights = window.weightLog[userKey] || {};
+            
+            const sortedEntries = Object.entries(userWeights)
+                .sort(([a], [b]) => new Date(a) - new Date(b));
+            
+            const labels = sortedEntries.map(([date]) => {
+                const d = new Date(date);
+                return d.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' });
+            });
+            
+            const data = sortedEntries.map(([, weight]) => weight);
+            
+            charts.weight.data.labels = labels;
+            charts.weight.data.datasets[0].data = data;
+            charts.weight.update();
+        }
+
+        function updateProgressStats() {
+            const userKey = window.currentUser || 'demo';
+            const profile = window.userData[userKey]?.profile;
+            
+            if (!profile) return;
+            
+            const userWeights = window.weightLog[userKey] || {};
+            const weightEntries = Object.entries(userWeights);
+            let currentWeight = profile.weight;
+            
+            if (weightEntries.length > 0) {
+                const latestEntry = weightEntries.sort(([a], [b]) => new Date(b) - new Date(a))[0];
+                currentWeight = latestEntry[1];
+            }
+            
+            const targetWeight = profile.targetWeight || profile.weight;
+            const weightDiff = Math.abs(targetWeight - currentWeight);
+            
+            // Update stat displays
+            const currentWeightEl = document.getElementById('currentWeightStat');
+            const targetWeightEl = document.getElementById('targetWeightStat');
+            const weightDiffEl = document.getElementById('weightDiffStat');
+            
+            if (currentWeightEl) currentWeightEl.textContent = currentWeight.toFixed(1);
+            if (targetWeightEl) targetWeightEl.textContent = targetWeight.toFixed(1);
+            if (weightDiffEl) {
+                const sign = currentWeight > targetWeight ? '-' : '+';
+                weightDiffEl.textContent = sign + weightDiff.toFixed(1);
+            }
+            
+            // Update progress chart
+            if (charts.progress) {
+                const totalChange = Math.abs(profile.weight - targetWeight);
+                const currentProgress = totalChange > 0 ? Math.abs(profile.weight - currentWeight) : 0;
+                const progressPercentage = totalChange > 0 ? (currentProgress / totalChange) * 100 : 100;
+                
+                charts.progress.data.datasets[0].data = [progressPercentage, 100 - progressPercentage];
+                charts.progress.update();
+            }
+        }
+
+        // === CALORIE ANALYTICS FUNCTIONS ===
+        function changeCaloriePeriod(period) {
+            // Update button states
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) event.target.classList.add('active');
+            
+            updateCalorieChart(period);
+        }
+
+        function updateCalorieChart(period = 'week') {
+            if (!charts.calorie || !window.dailyFoodLog) return;
+            
+            const userKey = window.currentUser || 'demo';
+            const profile = window.userData[userKey]?.profile;
+            const targetCalories = profile?.targetCalories || 2000;
+            
+            let days = 7;
+            if (period === 'month') days = 30;
+            else if (period === '3months') days = 90;
+            
+            const today = new Date();
+            const labels = [];
+            const calorieData = [];
+            const targetData = [];
+            
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                
+                // Format label based on period
+                let label;
+                if (period === 'week') {
+                    label = date.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric' });
+                } else {
+                    label = date.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' });
+                }
+                labels.push(label);
+                
+                // Calculate calories for this date
+                let totalCalories = 0;
+                const dayLog = window.dailyFoodLog[userKey]?.[dateString];
+                if (dayLog) {
+                    Object.values(dayLog).forEach(meal => {
+                        if (Array.isArray(meal)) {
+                            meal.forEach(food => {
+                                totalCalories += food.calories || 0;
+                            });
+                        }
+                    });
+                }
+                
+                calorieData.push(totalCalories);
+                targetData.push(targetCalories);
+            }
+            
+            charts.calorie.data.labels = labels;
+            charts.calorie.data.datasets[0].data = calorieData;
+            charts.calorie.data.datasets[1].data = targetData;
+            charts.calorie.update();
+            
+            // Update average calories stat
+            const avgCalories = calorieData.length > 0 ? 
+                Math.round(calorieData.reduce((a, b) => a + b, 0) / calorieData.length) : 0;
+            const avgCaloriesEl = document.getElementById('avgCaloriesStat');
+            if (avgCaloriesEl) avgCaloriesEl.textContent = avgCalories;
+        }
+
+        function updateNutritionChart() {
+            if (!charts.nutrition || !window.dailyFoodLog) return;
+            
+            const userKey = window.currentUser || 'demo';
+            const today = new Date().toISOString().split('T')[0];
+            const todayLog = window.dailyFoodLog[userKey]?.[today] || {};
+            
+            let totalCalories = 0, totalProtein = 0;
+            
+            Object.values(todayLog).forEach(meal => {
+                if (Array.isArray(meal)) {
+                    meal.forEach(food => {
+                        totalCalories += food.calories || 0;
+                        totalProtein += food.protein || 0;
+                    });
+                }
+            });
+            
+            // Estimate macros (simplified calculation)
+            const proteinCalories = totalProtein * 4; // 4 kcal per gram of protein
+            const estimatedFat = Math.max((totalCalories * 0.3) / 9, 0); // 30% of calories from fat, 9 kcal per gram
+            const estimatedCarbs = Math.max((totalCalories - proteinCalories - (estimatedFat * 9)) / 4, 0);
+            
+            const macros = [
+                Math.round(estimatedCarbs),
+                totalProtein,
+                Math.round(estimatedFat)
+            ];
+            
+            charts.nutrition.data.datasets[0].data = macros;
+            charts.nutrition.update();
+        }
+
+        function updateAllCharts() {
+            if (window.currentUser) {
+                updateWeightChart();
+                updateCalorieChart('week');
+                updateProgressStats();
+                updateNutritionChart();
+            }
+        }
+
+        // ฟังก์ชันเพิ่มอาหาร - ปรับปรุงการจัดการข้อมูล
+        function addFood() {
+            const mealTypeEl = document.getElementById('mealType');
+            const foodNameEl = document.getElementById('foodName');
+            const amountEl = document.getElementById('foodAmount');
+            const unitEl = document.getElementById('foodUnit');
+            const manualCaloriesEl = document.getElementById('manualCalories');
+            
+            if (!mealTypeEl || !foodNameEl || !amountEl || !unitEl) return;
+
+            const mealType = mealTypeEl.value;
+            const foodName = foodNameEl.value.trim();
+            const amount = parseFloat(amountEl.value) || 1;
+            const unit = unitEl.value;
+            const manualCalories = manualCaloriesEl ? parseFloat(manualCaloriesEl.value) : null;
+
+            if (!foodName) {
+                alert('กรุณาใส่ชื่ออาหาร');
+                return;
+            }
+
+            const userKey = window.currentUser || 'demo';
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (!window.dailyFoodLog) window.dailyFoodLog = {};
+            if (!window.dailyFoodLog[userKey]) window.dailyFoodLog[userKey] = {};
+            if (!window.dailyFoodLog[userKey][today]) {
+                window.dailyFoodLog[userKey][today] = {
+                    breakfast: [],
+                    lunch: [],
+                    dinner: [],
+                    snack: []
+                };
+            }
+
+            // คำนวดแคลอรี่และสารอาหาร
+            let calories, protein = 0, sodium = 0;
+            
+            if (manualCalories) {
+                calories = manualCalories * amount;
+            } else if (foodDatabase[foodName]) {
+                const foodData = foodDatabase[foodName];
+                calories = foodData.calories * amount;
+                protein = foodData.protein * amount;
+                sodium = foodData.sodium * amount;
+            } else {
+                // ประมาดการถ้าไม่มีในฐานข้อมูล
+                calories = 150 * amount; // ค่าเฉลี่ย
+                protein = 5 * amount;
+                sodium = 300 * amount;
+            }
+
+            const foodItem = {
+                name: foodName,
+                amount: amount,
+                unit: unit,
+                calories: Math.round(calories),
+                protein: Math.round(protein),
+                sodium: Math.round(sodium),
+                timestamp: new Date().toISOString()
+            };
+
+            window.dailyFoodLog[userKey][today][mealType].push(foodItem);
+            
+            // เคลียร์ฟอร์ม
+            foodNameEl.value = '';
+            amountEl.value = '1';
+            if (manualCaloriesEl) manualCaloriesEl.value = '';
+            hideSuggestions();
+
+            // Save and update displays
+            if (window.saveToStorage) window.saveToStorage();
+            if (window.syncToFirestore) window.syncToFirestore();
+            
+            loadFoodLog();
+            updateDailyStats();
+            updateAllCharts();
+        }
+
+        // ฟังก์ชันโหลดและแสดงรายการอาหาร
+        function loadFoodLog() {
+            const userKey = window.currentUser || 'demo';
+            const today = new Date().toISOString().split('T')[0];
+            const todayLog = window.dailyFoodLog[userKey]?.[today] || {
+                breakfast: [], lunch: [], dinner: [], snack: []
+            };
+
+            const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+            const mealContainers = ['breakfastList', 'lunchList', 'dinnerList', 'snackList'];
+
+            mealTypes.forEach((mealType, index) => {
+                const container = document.getElementById(mealContainers[index]);
+                if (!container) return;
+                
+                const foods = todayLog[mealType] || [];
+                
+                if (foods.length === 0) {
+                    container.innerHTML = '<p style="color: #666; text-align: center;">ยังไม่มีรายการอาหาร</p>';
+                } else {
+                    container.innerHTML = foods.map((food, idx) => `
+                        <div class="food-item">
+                            <div class="food-info">
+                                <div class="food-name">${food.name}</div>
+                                <div class="food-details">${food.amount} ${food.unit} - ${Math.round(food.calories)} แคลอรี่, ${Math.round(food.protein)}g โปรตีน, ${Math.round(food.sodium)}mg โซเดียม</div>
+                            </div>
+                            <button class="btn btn-danger btn-small" onclick="removeFood('${mealType}', ${idx})">ลบ</button>
+                        </div>
+                    `).join('');
+                }
+            });
+        }
+
+        // ฟังก์ชันลบอาหาร
+        function removeFood(mealType, index) {
+            if (!confirm('ต้องการลบรายการนี้หรือไม่?')) return;
+
+            const userKey = window.currentUser || 'demo';
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (window.dailyFoodLog[userKey] && window.dailyFoodLog[userKey][today] && window.dailyFoodLog[userKey][today][mealType]) {
+                window.dailyFoodLog[userKey][today][mealType].splice(index, 1);
+                
+                // Save and update displays
+                if (window.saveToStorage) window.saveToStorage();
+                if (window.syncToFirestore) window.syncToFirestore();
+                
+                loadFoodLog();
+                updateDailyStats();
+                updateAllCharts();
+            }
+        }
+
+        // ฟังก์ชันอัปเดตสถิติรายวัน
+        function updateDailyStats() {
+            const userKey = window.currentUser || 'demo';
+            const today = new Date().toISOString().split('T')[0];
+            const todayLog = window.dailyFoodLog[userKey]?.[today] || {
+                breakfast: [], lunch: [], dinner: [], snack: []
+            };
+            
+            let totalCalories = 0, totalProtein = 0, totalSodium = 0;
+            
+            Object.values(todayLog).forEach(meal => {
+                if (Array.isArray(meal)) {
+                    meal.forEach(food => {
+                        totalCalories += food.calories || 0;
+                        totalProtein += food.protein || 0;
+                        totalSodium += food.sodium || 0;
+                    });
+                }
+            });
+
+            const profile = window.userData[userKey]?.profile;
+            const targetCalories = profile?.targetCalories || 2000;
+            const remainingCalories = Math.max(0, targetCalories - totalCalories);
+
+            // Update stat cards
+            const caloriesConsumedEl = document.getElementById('caloriesConsumed');
+            const caloriesRemainingEl = document.getElementById('caloriesRemaining');
+            const proteinConsumedEl = document.getElementById('proteinConsumed');
+            const sodiumConsumedEl = document.getElementById('sodiumConsumed');
+
+            if (caloriesConsumedEl) caloriesConsumedEl.textContent = Math.round(totalCalories);
+            if (caloriesRemainingEl) caloriesRemainingEl.textContent = Math.round(remainingCalories);
+            if (proteinConsumedEl) proteinConsumedEl.textContent = Math.round(totalProtein) + 'g';
+            if (sodiumConsumedEl) sodiumConsumedEl.textContent = Math.round(totalSodium) + 'mg';
+
+            // อัปเดต progress bar
+            const progress = Math.min((totalCalories / targetCalories) * 100, 100);
+            const calorieProgressEl = document.getElementById('calorieProgress');
+            if (calorieProgressEl) calorieProgressEl.style.width = progress + '%';
+
+            // อัปเดต progress ring
+            const progressRingEl = document.getElementById('progressRing');
+            const progressTextEl = document.getElementById('progressText');
+            
+            if (progressRingEl && progressTextEl) {
+                const circumference = 2 * Math.PI * 50; // radius = 50
+                const offset = circumference - (progress / 100) * circumference;
+                progressRingEl.style.strokeDashoffset = offset;
+                progressTextEl.textContent = Math.round(progress) + '%';
+            }
+        }
+
+        // ฟังก์ชันโหลดประวัติ
+        function loadHistory() {
+            const historyContainer = document.getElementById('historyList');
+            if (!historyContainer) return;
+            
+            const userKey = window.currentUser || 'demo';
+            const userLog = window.dailyFoodLog[userKey] || {};
+            
+            if (!userLog || Object.keys(userLog).length === 0) {
+                historyContainer.innerHTML = '<p style="color: #666; text-align: center;">ยังไม่มีประวัติการทานอาหาร</p>';
+                return;
+            }
+
+            const sortedDates = Object.keys(userLog)
+                .sort((a, b) => new Date(b) - new Date(a))
+                .slice(0, 10); // Show last 10 days
+
+            historyContainer.innerHTML = sortedDates.map(date => {
+                const dayLog = userLog[date];
+                let totalCalories = 0;
+                
+                Object.values(dayLog).forEach(meal => {
+                    if (Array.isArray(meal)) {
+                        meal.forEach(food => {
+                            totalCalories += food.calories || 0;
+                        });
+                    }
+                });
+
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                return `
+                    <div class="food-item" style="margin-bottom: 15px;">
+                        <div class="food-info">
+                            <div class="food-name">${formattedDate}</div>
+                            <div class="food-details">รวม ${Math.round(totalCalories)} แคลอรี่</div>
+                        </div>
+                        <div>${Math.round(totalCalories)} kcal</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ฟังก์ชันคำนวด TDEE
+        function calculateTDEE(profile) {
+            const { age, gender, height, weight, activity } = profile;
+            
+            // คำนวด BMR ด้วย Mifflin-St Jeor equation
+            let bmr;
+            if (gender === 'male') {
+                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            } else {
+                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            }
+            
+            // คำนวด TDEE
+            const tdee = bmr * parseFloat(activity);
+            
+            // คำนวด BMI
+            const bmi = weight / ((height / 100) ** 2);
+            
+            return { bmr: Math.round(bmr), tdee: Math.round(tdee), bmi: bmi.toFixed(1) };
+        }
+
+        // ฟังก์ชันอัปเดตโปรไฟล์
+        function updateProfile() {
+            const userKey = window.currentUser || 'demo';
+            
+            if (!window.userData) window.userData = {};
+            if (!window.userData[userKey]) {
+                window.userData[userKey] = { 
+                    name: 'ผู้ใช้',
+                    profile: getDefaultProfile() 
+                };
+            }
+
+            const profile = window.userData[userKey].profile;
+            
+            const ageEl = document.getElementById('age');
+            const genderEl = document.getElementById('gender');
+            const heightEl = document.getElementById('height');
+            const weightEl = document.getElementById('weight');
+            const activityEl = document.getElementById('activity');
+            const goalEl = document.getElementById('goal');
+            const targetWeightEl = document.getElementById('targetWeight');
+            
+            if (ageEl && ageEl.value) profile.age = parseInt(ageEl.value);
+            if (genderEl) profile.gender = genderEl.value;
+            if (heightEl && heightEl.value) profile.height = parseInt(heightEl.value);
+            if (weightEl && weightEl.value) profile.weight = parseFloat(weightEl.value);
+            if (activityEl) profile.activity = parseFloat(activityEl.value);
+            if (goalEl) profile.goal = parseFloat(goalEl.value);
+            if (targetWeightEl && targetWeightEl.value) profile.targetWeight = parseFloat(targetWeightEl.value);
+
+            // Only calculate if we have minimum required data
+            if (profile.age && profile.height && profile.weight) {
+                const results = calculateTDEE(profile);
+                const goalCalories = results.tdee + (profile.goal * 7700 / 7); // 7700 kcal = 1 kg
+
+                // Update display elements
+                const bmrValueEl = document.getElementById('bmrValue');
+                const tdeeValueEl = document.getElementById('tdeeValue');
+                const targetCaloriesEl = document.getElementById('targetCalories');
+                const bmiValueEl = document.getElementById('bmiValue');
+                const tdeeResultEl = document.getElementById('tdeeResult');
+
+                if (bmrValueEl) bmrValueEl.textContent = results.bmr;
+                if (tdeeValueEl) tdeeValueEl.textContent = results.tdee;
+                if (targetCaloriesEl) targetCaloriesEl.textContent = Math.round(goalCalories);
+                if (bmiValueEl) bmiValueEl.textContent = results.bmi;
+                if (tdeeResultEl) tdeeResultEl.style.display = 'block';
+
+                profile.targetCalories = Math.round(goalCalories);
+            }
+            
+            // Save and update
+            if (window.saveToStorage) window.saveToStorage();
+            if (window.syncToFirestore) window.syncToFirestore();
+            
+            updateDailyStats();
+            updateAllCharts();
+            
+            alert('อัปเดตข้อมูลเรียบร้อยแล้ว');
+        }
+
+        function loadProfile() {
+            const userKey = window.currentUser || 'demo';
+            
+            // Ensure user data exists
+            if (!window.userData) window.userData = {};
+            if (!window.userData[userKey]) {
+                window.userData[userKey] = { 
+                    name: 'ผู้ใช้',
+                    profile: getDefaultProfile() 
+                };
+            }
+            
+            const profile = window.userData[userKey].profile;
+            
+            const ageEl = document.getElementById('age');
+            const genderEl = document.getElementById('gender');
+            const heightEl = document.getElementById('height');
+            const weightEl = document.getElementById('weight');
+            const activityEl = document.getElementById('activity');
+            const goalEl = document.getElementById('goal');
+            const targetWeightEl = document.getElementById('targetWeight');
+
+            if (ageEl) ageEl.value = profile.age || '';
+            if (genderEl) genderEl.value = profile.gender || 'male';
+            if (heightEl) heightEl.value = profile.height || '';
+            if (weightEl) weightEl.value = profile.weight || '';
+            if (activityEl) activityEl.value = profile.activity || 1.375;
+            if (goalEl) goalEl.value = profile.goal || 0;
+            if (targetWeightEl) targetWeightEl.value = profile.targetWeight || '';
+
+            // Auto-calculate if data exists
+            if (profile.age && profile.height && profile.weight && !profile.targetCalories) {
+                updateProfile();
+            }
+        }
+
+        function getDefaultProfile() {
+            return {
+                age: 25,
+                gender: 'male',
+                height: 170,
+                weight: 70,
+                activity: 1.375,
+                goal: 0,
+                targetWeight: 70,
+                targetCalories: 2000
+            };
+        }
+
+        // UI Functions
+        function showTab(tabName) {
+            // ซ่อน tab ทั้งหมด
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // แสดง tab ที่เลือก
+            const targetTab = document.getElementById(tabName + 'Tab');
+            if (targetTab) targetTab.classList.add('active');
+            
+            if (event && event.target) event.target.classList.add('active');
+
+            if (tabName === 'history') {
+                loadHistory();
+            } else if (tabName === 'analytics') {
+                updateAllCharts();
+            }
+        }
+
+        function showProfile() {
+            showTab('profile');
+        }
+
+        function quickAddFood() {
+            showTab('food');
+            const foodNameEl = document.getElementById('foodName');
+            if (foodNameEl) foodNameEl.focus();
+        }
+
+        function hideStorageWarning() {
+            document.getElementById('storageWarning').style.display = 'none';
+        }
+
+        // Make functions global for onclick handlers
+        window.addFood = addFood;
+        window.removeFood = removeFood;
+        window.updateProfile = updateProfile;
+        window.loadProfile = loadProfile;
+        window.showTab = showTab;
+        window.showProfile = showProfile;
+        window.quickAddFood = quickAddFood;
+        window.addWeightEntry = addWeightEntry;
+        window.changeCaloriePeriod = changeCaloriePeriod;
+        window.openBarcodeScanner = openBarcodeScanner;
+        window.closeBarcodeScanner = closeBarcodeScanner;
+        window.selectSuggestionByClick = selectSuggestionByClick;
+        window.updateDailyStats = updateDailyStats;
+        window.loadFoodLog = loadFoodLog;
+        window.updateAllCharts = updateAllCharts;
+        window.hideStorageWarning = hideStorageWarning;
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginEmailEl = document.getElementById('loginEmail');
+            const loginPasswordEl = document.getElementById('loginPassword');
+            const regPasswordEl = document.getElementById('regPassword');
+            const forgotEmailEl = document.getElementById('forgotEmail');
+            const otpCodeEl = document.getElementById('otpCode');
+            const newPasswordEl = document.getElementById('newPassword');
+            const confirmPasswordEl = document.getElementById('confirmPassword');
+            
+            // Login form events
+            if (loginEmailEl) {
+                loginEmailEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && window.login) window.login();
+                });
+            }
+            
+            if (loginPasswordEl) {
+                loginPasswordEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && window.login) window.login();
+                });
+            }
+            
+            // Register form events
+            if (regPasswordEl) {
+                regPasswordEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && window.register) window.register();
+                });
+            }
+            
+            // Forgot password form events
+            if (forgotEmailEl) {
+                forgotEmailEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && window.sendOTP) window.sendOTP();
+                });
+            }
+            
+            // OTP form events
+            if (otpCodeEl) {
+                // Auto-format OTP input
+                otpCodeEl.addEventListener('input', function(e) {
+                    // Only allow numbers
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    
+                    // Auto-focus next field when 6 digits are entered
+                    if (e.target.value.length === 6) {
+                        const newPasswordEl = document.getElementById('newPassword');
+                        if (newPasswordEl) newPasswordEl.focus();
+                    }
+                });
+                
+                otpCodeEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const newPasswordEl = document.getElementById('newPassword');
+                        if (newPasswordEl) newPasswordEl.focus();
+                    }
+                });
+            }
+            
+            if (newPasswordEl) {
+                newPasswordEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const confirmPasswordEl = document.getElementById('confirmPassword');
+                        if (confirmPasswordEl) confirmPasswordEl.focus();
+                    }
+                });
+            }
+            
+            if (confirmPasswordEl) {
+                confirmPasswordEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && window.resetPassword) window.resetPassword();
+                });
+            }
+
+            // Food form events
+            const foodNameEl = document.getElementById('foodName');
+            if (foodNameEl) {
+                foodNameEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && selectedSuggestionIndex === -1) {
+                        addFood();
+                    }
+                });
+            }
+
+            const foodAmountEl = document.getElementById('foodAmount');
+            if (foodAmountEl) {
+                foodAmountEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') addFood();
+                });
+            }
+
+            const manualCaloriesEl = document.getElementById('manualCalories');
+            if (manualCaloriesEl) {
+                manualCaloriesEl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') addFood();
+                });
+            }
+
+            // Profile form auto-save on change
+            const profileInputs = ['age', 'gender', 'height', 'weight', 'activity', 'goal', 'targetWeight'];
+            profileInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', function() {
+                        // Auto-save after 2 seconds of no changes
+                        clearTimeout(window.profileSaveTimeout);
+                        window.profileSaveTimeout = setTimeout(() => {
+                            if (window.saveToStorage) window.saveToStorage();
+                        }, 2000);
+                    });
+                }
+            });
+        });
+
+        // Periodic data backup
+        setInterval(() => {
+            if (window.currentUser) {
+                // Create backup in different key
+                try {
+                    const backupData = {
+                        users: window.userData || {},
+                        dailyLog: window.dailyFoodLog || {},
+                        weightLog: window.weightLog || {},
+                        currentUser: window.currentUser,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('calorieAppBackup', JSON.stringify(backupData));
+                } catch (e) {
+                    console.error('Cannot create backup:', e);
+                }
+            }
+        }, 300000); // Every 5 minutes
+
+        // Recovery function for corrupted data
+        function recoverFromBackup() {
+            try {
+                const backup = localStorage.getItem('calorieAppBackup');
+                if (backup) {
+                    const backupData = JSON.parse(backup);
+                    window.userData = backupData.users || {};
+                    window.dailyFoodLog = backupData.dailyLog || {};
+                    window.weightLog = backupData.weightLog || {};
+                    console.log('Data recovered from backup');
+                    return true;
+                }
+            } catch (e) {
+                console.error('Cannot recover from backup:', e);
+            }
+            return false;
+        }
+
+        // Export data function
+        function exportData() {
+            try {
+                const exportData = {
+                    users: window.userData || {},
+                    dailyLog: window.dailyFoodLog || {},
+                    weightLog: window.weightLog || {},
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `caloriepal-data-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                alert('ข้อมูลได้ถูกส่งออกเรียบร้อยแล้ว');
+            } catch (e) {
+                console.error('Export failed:', e);
+                alert('เกิดข้อผิดพลาดในการส่งออกข้อมูล');
+            }
+        }
+
+        // Import data function
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (importedData.users) {
+                        // Merge with existing data
+                        window.userData = { ...window.userData, ...importedData.users };
+                    }
+                    if (importedData.dailyLog) {
+                        window.dailyFoodLog = { ...window.dailyFoodLog, ...importedData.dailyLog };
+                    }
+                    if (importedData.weightLog) {
+                        window.weightLog = { ...window.weightLog, ...importedData.weightLog };
+                    }
+                    
+                    // Save merged data
+                    if (window.saveToStorage) window.saveToStorage();
+                    if (window.syncToFirestore) window.syncToFirestore();
+                    
+                    // Refresh displays
+                    if (window.currentUser) {
+                        loadProfile();
+                        updateDailyStats();
+                        loadFoodLog();
+                        updateAllCharts();
+                    }
+                    
+                    alert('นำเข้าข้อมูลสำเร็จ');
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    alert('เกิดข้อผิดพลาดในการนำเข้าข้อมูล ไฟล์อาจเสียหาย');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Data management functions
+        window.exportData = exportData;
+        window.importData = importData;
+        window.recoverFromBackup = recoverFromBackup;
+
+        // เริ่มต้นแอป
+        init();
+    </script>
+</body>
+</html>
