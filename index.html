@@ -374,11 +374,25 @@
         }
 
         .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+	    font-size: 12px;
+	    opacity: 0.9;
+	    text-transform: uppercase;
+	    letter-spacing: 0.5px;
+	}
+
+	.stat-progress {
+ 	   margin-top: 8px;
+	}
+
+	.stat-progress .progress-bar {
+	    margin: 0;
+	}
+
+	.stat-progress small {
+	    display: block;
+	    text-align: center;
+	    margin-top: 3px;
+	}
 
         .food-item {
             display: flex;
@@ -686,11 +700,11 @@
             .container {
                 padding: 10px;
             }
-            
+    
             .grid {
                 grid-template-columns: 1fr;
             }
-            
+    
             .header {
                 flex-direction: column;
                 text-align: center;
@@ -722,6 +736,44 @@
                 height: 50px;
                 font-size: 20px;
             }
+
+            /* Mobile adjustments for nutrition form */
+            .nutrition-form-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+        }
+
+        /* Nutrition form styling */
+        .nutrition-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .nutrition-section {
+            border-top: 1px solid #e1e5e9;
+            margin: 20px 0;
+            padding-top: 20px;
+        }
+
+        .nutrition-section h4 {
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nutrition-note {
+            background: #f8f9ff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
         }
 
         /* Animation Classes */
@@ -909,25 +961,76 @@
             <!-- สถิติรายวัน -->
             <div class="card fade-in">
                 <h3 style="margin-bottom: 20px;">สรุปวันนี้</h3>
-                <div class="stats-grid">
-                    <div class="stat-card" onclick="showTab('analytics')">
-                        <div class="stat-number" id="caloriesConsumed">0</div>
-                        <div class="stat-label">แคลอรี่ที่ทาน</div>
-                    </div>
-                    <div class="stat-card" onclick="showTab('analytics')">
-                        <div class="stat-number" id="caloriesRemaining">0</div>
-                        <div class="stat-label">แคลอรี่คงเหลือ</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="proteinConsumed">0g</div>
-                        <div class="stat-label">โปรตีน</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="sodiumConsumed">0mg</div>
-                        <div class="stat-label">โซเดียม</div>
-                    </div>
-                </div>
-
+	<div class="stats-grid">
+	    <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="caloriesConsumed">0</div>
+	        <div class="stat-label">แคลอรี่ที่ทาน</div>
+	    </div>
+	    <div class="stat-card" onclick="showTab('analytics')">
+ 	       <div class="stat-number" id="caloriesRemaining">0</div>
+	        <div class="stat-label">แคลอรี่คงเหลือ</div>
+	    </div>
+	    <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="proteinConsumed">0g</div>
+ 	       <div class="stat-label">โปรตีน</div>
+ 	       <div class="stat-progress">
+	            <div class="progress-bar" style="height: 6px; margin-top: 5px;">
+ 	               <div class="progress-fill" id="proteinProgress" style="width: 0%; background: #ff6b35;"></div>
+	            </div>
+	            <small id="proteinTarget" style="font-size: 10px; opacity: 0.8;">เป้าหมาย: 0g</small>
+	        </div>
+ 	   </div>
+ 	   <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="sodiumConsumed">0mg</div>
+	        <div class="stat-label">โซเดียม</div>
+	        <div class="stat-progress">
+	            <div class="progress-bar" style="height: 6px; margin-top: 5px;">
+	                <div class="progress-fill" id="sodiumProgress" style="width: 0%; background: #ffc107;"></div>
+	            </div>
+	            <small id="sodiumTarget" style="font-size: 10px; opacity: 0.8;">เป้าหมาย: 0mg</small>
+	        </div>
+	    </div>
+	    <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="carbsConsumed">0g</div>
+	        <div class="stat-label">คาร์โบไฮเดรต</div>
+	        <div class="stat-progress">
+	            <div class="progress-bar" style="height: 6px; margin-top: 5px;">
+	                <div class="progress-fill" id="carbsProgress" style="width: 0%; background: #28a745;"></div>
+ 	           </div>
+	            <small id="carbsTarget" style="font-size: 10px; opacity: 0.8;">เป้าหมาย: 0g</small>
+	        </div>
+	    </div>
+	    <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="fatConsumed">0g</div>
+	        <div class="stat-label">ไขมัน</div>
+	        <div class="stat-progress">
+ 	           <div class="progress-bar" style="height: 6px; margin-top: 5px;">
+	                <div class="progress-fill" id="fatProgress" style="width: 0%; background: #6f42c1;"></div>
+ 	           </div>
+	            <small id="fatTarget" style="font-size: 10px; opacity: 0.8;">เป้าหมาย: 0g</small>
+	        </div>
+	    </div>
+	    <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="fiberConsumed">0g</div>
+	        <div class="stat-label">ใยอาหาร</div>
+	        <div class="stat-progress">
+	            <div class="progress-bar" style="height: 6px; margin-top: 5px;">
+	                <div class="progress-fill" id="fiberProgress" style="width: 0%; background: #17a2b8;"></div>
+	            </div>
+	            <small id="fiberTarget" style="font-size: 10px; opacity: 0.8;">เป้าหมาย: 0g</small>
+	        </div>
+	    </div>
+	    <div class="stat-card" onclick="showTab('analytics')">
+	        <div class="stat-number" id="sugarConsumed">0g</div>
+	        <div class="stat-label">น้ำตาล</div>
+	        <div class="stat-progress">
+	            <div class="progress-bar" style="height: 6px; margin-top: 5px;">
+	                <div class="progress-fill" id="sugarProgress" style="width: 0%; background: #dc3545;"></div>
+	            </div>
+	            <small id="sugarTarget" style="font-size: 10px; opacity: 0.8;">เป้าหมาย: 0g</small>
+	        </div>
+	    </div>
+	</div>
                 <!-- Progress Ring -->
                 <div class="progress-ring">
                     <svg width="120" height="120">
@@ -1015,6 +1118,43 @@
                             <label for="manualCalories">แคลอรี่ (หากทราบ)</label>
                             <input type="number" id="manualCalories" placeholder="ไม่ใส่ระบบจะคำนวดให้" step="0.1">
                         </div>
+
+                        <!-- ส่วนสารอาหารเพิ่มเติม -->
+                        <div class="nutrition-section">
+                            <h4>🥗 ข้อมูลสารอาหารเพิ่มเติม (หากทราบ)</h4>
+    
+                            <div class="nutrition-form-grid">
+                                <div class="form-group">
+                                    <label for="manualProtein">โปรตีน (g)</label>
+                                    <input type="number" id="manualProtein" placeholder="กรัม" step="0.1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualCarbs">คาร์โบไฮเดรต (g)</label>
+                                    <input type="number" id="manualCarbs" placeholder="กรัม" step="0.1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualFat">ไขมัน (g)</label>
+                                    <input type="number" id="manualFat" placeholder="กรัม" step="0.1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualFiber">ใยอาหาร (g)</label>
+                                    <input type="number" id="manualFiber" placeholder="กรัม" step="0.1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualSugar">น้ำตาล (g)</label>
+                                    <input type="number" id="manualSugar" placeholder="กรัม" step="0.1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualSodium">โซเดียม (mg)</label>
+                                    <input type="number" id="manualSodium" placeholder="มิลลิกรัม" step="1" min="0">
+                                </div>
+                            </div>
+    
+                            <div class="nutrition-note">
+                                <strong>💡 หมายเหตุ:</strong> ถ้าไม่กรอก ระบบจะใช้ข้อมูลจากฐานข้อมูลอาหาร หรือประมาณการหากไม่พบข้อมูล
+                        </div>
+                        </div>
+
                         <button class="btn" onclick="addFood()">เพิ่มอาหาร</button>
                     </div>
 
@@ -1933,44 +2073,44 @@
 
         // ฐานข้อมูลอาหารพื้นฐาน - ขยายเพิ่มเติม
         const foodDatabase = {
-            'ข้าวผัด': { calories: 250, protein: 8, sodium: 800, unit: 'จาน' },
-            'ไข่ต้ม': { calories: 70, protein: 6, sodium: 70, unit: 'ฟอง' },
-            'อกไก่ต้ม': { calories: 120, protein: 26, sodium: 60, unit: 'ชิ้น' },
-            'ไข่ดาว': { calories: 90, protein: 6, sodium: 90, unit: 'ฟอง' },
-            'ไข่เจียว': { calories: 180, protein: 8, sodium: 150, unit: 'ชิ้น' },
-            'ไข่เจียวหมูสับ': { calories: 220, protein: 12, sodium: 200, unit: 'ฟอง' },
-            'ไข่พะโล้': { calories: 150, protein: 8, sodium: 300, unit: 'ฟอง' },
-            'ไข่ลวก': { calories: 70, protein: 6, sodium: 70, unit: 'ฟอง' },
-            'ก๋วยเตี๋ยว': { calories: 300, protein: 15, sodium: 1200, unit: 'ชาม' },
-            'ผัดไทย': { calories: 400, protein: 12, sodium: 900, unit: 'จาน' },
-            'ไก่ย่าง': { calories: 200, protein: 35, sodium: 300, unit: 'ชิ้น' },
-            'หมูปิ้ง': { calories: 250, protein: 20, sodium: 400, unit: 'ไม้' },
-            'ส้มตำ': { calories: 120, protein: 5, sodium: 600, unit: 'จาน' },
-            'ปลาแซลมอนนึ่ง': { calories: 180, protein: 20, sodium: 50, unit: 'จาน' },
-            'แกงเขียวหวาน': { calories: 280, protein: 18, sodium: 800, unit: 'จาน' },
-            'ต้มยำกุ้ง': { calories: 200, protein: 20, sodium: 1000, unit: 'ชาม' },
-            'ข้าวเปล่า': { calories: 130, protein: 3, sodium: 0, unit: 'จาน' },
-            'ข้าวโพด': { calories: 90, protein: 3, sodium: 15, unit: 'แก้ว' },
-            'กล้วยหอม': { calories: 90, protein: 1, sodium: 1, unit: 'ตัว' },
-            'แอปเปิ้ล': { calories: 80, protein: 0, sodium: 2, unit: 'ตัว' },
-            'ส้ม': { calories: 60, protein: 1, sodium: 0, unit: 'ตัว' },
-            'มะม่วง': { calories: 100, protein: 1, sodium: 2, unit: 'ตัว' },
-            'น้ำปลา': { calories: 10, protein: 2, sodium: 1500, unit: 'ช้อน' },
-            'น้ำตาล': { calories: 50, protein: 0, sodium: 0, unit: 'ช้อน' },
-            'นม': { calories: 60, protein: 3, sodium: 50, unit: 'แก้ว' },
-            'นมถั่วเหลือง': { calories: 80, protein: 7, sodium: 90, unit: 'แก้ว' },
-            'กาแฟดำ': { calories: 5, protein: 0, sodium: 5, unit: 'แก้ว' },
-            'ชาเขียว': { calories: 2, protein: 0, sodium: 1, unit: 'แก้ว' },
-            'น้ำเปล่า': { calories: 0, protein: 0, sodium: 0, unit: 'แก้ว' },
-            'ข้าวต้มไก่': { calories: 200, protein: 15, sodium: 600, unit: 'ชาม' },
-            'โจ๊ก': { calories: 150, protein: 8, sodium: 400, unit: 'ชาม' },
-            'ขนมปัง': { calories: 80, protein: 3, sodium: 150, unit: 'ชิ้น' },
-            'ข้าวหมกไก่': { calories: 350, protein: 20, sodium: 900, unit: 'จาน' },
-            'ผักบุ้งไฟแดง': { calories: 80, protein: 3, sodium: 400, unit: 'จาน' },
-            'ลาบหมู': { calories: 200, protein: 18, sodium: 700, unit: 'จาน' },
-            'แกงส้มปลา': { calories: 150, protein: 15, sodium: 800, unit: 'ชาม' },
-            'ข้าวผัดกะเพรา': { calories: 400, protein: 15, sodium: 1000, unit: 'จาน' }
-        };
+            'ข้าวผัด': { calories: 250, protein: 8, sodium: 800, carbs: 45, fat: 8, fiber: 2, sugar: 3, unit: 'จาน' },
+	        'ไข่ต้ม': { calories: 70, protein: 6, sodium: 70, carbs: 1, fat: 5, fiber: 0, sugar: 0, unit: 'ฟอง' },
+	        'อกไก่ต้ม': { calories: 120, protein: 26, sodium: 60, carbs: 0, fat: 2, fiber: 0, sugar: 0, unit: 'ชิ้น' },
+	        'ไข่ดาว': { calories: 90, protein: 6, sodium: 90, carbs: 1, fat: 7, fiber: 0, sugar: 0, unit: 'ฟอง' },
+ 		        'ไข่เจียว': { calories: 180, protein: 8, sodium: 150, carbs: 3, fat: 15, fiber: 0, sugar: 1, unit: 'ชิ้น' },
+	        'ไข่เจียวหมูสับ': { calories: 220, protein: 12, sodium: 200, carbs: 4, fat: 18, fiber: 0, sugar: 1, unit: 'ฟอง' },
+ 	 	        'ไข่พะโล้': { calories: 150, protein: 8, sodium: 300, carbs: 8, fat: 10, fiber: 0, sugar: 6, unit: 'ฟอง' },
+	        'ไข่ลวก': { calories: 70, protein: 6, sodium: 70, carbs: 1, fat: 5, fiber: 0, sugar: 0, unit: 'ฟอง' },
+	        'ก๋วยเตี๋ยว': { calories: 300, protein: 15, sodium: 1200, carbs: 50, fat: 8, fiber: 3, sugar: 5, unit: 'ชาม' },
+	        'ผัดไทย': { calories: 400, protein: 12, sodium: 900, carbs: 60, fat: 15, fiber: 4, sugar: 12, unit: 'จาน' },
+	        'ไก่ย่าง': { calories: 200, protein: 35, sodium: 300, carbs: 0, fat: 6, fiber: 0, sugar: 0, unit: 'ชิ้น' },
+	        'หมูปิ้ง': { calories: 250, protein: 20, sodium: 400, carbs: 8, fat: 16, fiber: 0, sugar: 6, unit: 'ไม้' },
+	        'ส้มตำ': { calories: 120, protein: 5, sodium: 600, carbs: 20, fat: 3, fiber: 4, sugar: 15, unit: 'จาน' },
+	        'ปลาแซลมอนนึ่ง': { calories: 180, protein: 20, sodium: 50, carbs: 0, fat: 11, fiber: 0, sugar: 0, unit: 'จาน' },
+	        'แกงเขียวหวาน': { calories: 280, protein: 18, sodium: 800, carbs: 12, fat: 20, fiber: 3, sugar: 8, unit: 'จาน' },
+	        'ต้มยำกุ้ง': { calories: 200, protein: 20, sodium: 1000, carbs: 15, fat: 8, fiber: 2, sugar: 10, unit: 'ชาม' },
+	        'ข้าวเปล่า': { calories: 130, protein: 3, sodium: 0, carbs: 28, fat: 0, fiber: 0, sugar: 0, unit: 'จาน' },
+	        'ข้าวโพด': { calories: 90, protein: 3, sodium: 15, carbs: 20, fat: 1, fiber: 3, sugar: 6, unit: 'แก้ว' },
+	        'กล้วยหอม': { calories: 90, protein: 1, sodium: 1, carbs: 23, fat: 0, fiber: 3, sugar: 12, unit: 'ตัว' },
+	        'แอปเปิ้ล': { calories: 80, protein: 0, sodium: 2, carbs: 21, fat: 0, fiber: 4, sugar: 16, unit: 'ตัว' },
+	        'ส้ม': { calories: 60, protein: 1, sodium: 0, carbs: 15, fat: 0, fiber: 3, sugar: 12, unit: 'ตัว' },
+	        'มะม่วง': { calories: 100, protein: 1, sodium: 2, carbs: 25, fat: 0, fiber: 3, sugar: 23, unit: 'ตัว' },
+	        'น้ำปลา': { calories: 10, protein: 2, sodium: 1500, carbs: 0, fat: 0, fiber: 0, sugar: 0, unit: 'ช้อน' },
+	        'น้ำตาล': { calories: 50, protein: 0, sodium: 0, carbs: 13, fat: 0, fiber: 0, sugar: 13, unit: 'ช้อน' },
+	        'นม': { calories: 60, protein: 3, sodium: 50, carbs: 5, fat: 3, fiber: 0, sugar: 5, unit: 'แก้ว' },
+	        'นมถั่วเหลือง': { calories: 80, protein: 7, sodium: 90, carbs: 4, fat: 4, fiber: 1, sugar: 1, unit: 'แก้ว' },
+	        'กาแฟดำ': { calories: 5, protein: 0, sodium: 5, carbs: 1, fat: 0, fiber: 0, sugar: 0, unit: 'แก้ว' },
+	        'ชาเขียว': { calories: 2, protein: 0, sodium: 1, carbs: 0, fat: 0, fiber: 0, sugar: 0, unit: 'แก้ว' },
+	        'น้ำเปล่า': { calories: 0, protein: 0, sodium: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, unit: 'แก้ว' },
+	        'ข้าวต้มไก่': { calories: 200, protein: 15, sodium: 600, carbs: 25, fat: 5, fiber: 1, sugar: 2, unit: 'ชาม' },
+	        'โจ๊ก': { calories: 150, protein: 8, sodium: 400, carbs: 25, fat: 3, fiber: 1, sugar: 1, unit: 'ชาม' },
+	        'ขนมปัง': { calories: 80, protein: 3, sodium: 150, carbs: 14, fat: 1, fiber: 1, sugar: 2, unit: 'ชิ้น' },
+	        'ข้าวหมกไก่': { calories: 350, protein: 20, sodium: 900, carbs: 45, fat: 12, fiber: 2, sugar: 4, unit: 'จาน' },
+	        'ผักบุ้งไฟแดง': { calories: 80, protein: 3, sodium: 400, carbs: 10, fat: 4, fiber: 3, sugar: 5, unit: 'จาน' },
+	        'ลาบหมู': { calories: 200, protein: 18, sodium: 700, carbs: 8, fat: 12, fiber: 2, sugar: 3, unit: 'จาน' },
+	        'แกงส้มปลา': { calories: 150, protein: 15, sodium: 800, carbs: 12, fat: 6, fiber: 2, sugar: 8, unit: 'ชาม' },
+	        'ข้าวผัดกะเพราไก่': { calories: 400, protein: 15, sodium: 1000, carbs: 55, fat: 15, fiber: 3, sugar: 5, unit: 'จาน' }
+};
 
         // Mock barcode database - ขยายเพิ่ม
         const barcodeDatabase = {
@@ -2601,21 +2741,58 @@
                 };
             }
 
-            // คำนวดแคลอรี่และสารอาหาร
-            let calories, protein = 0, sodium = 0;
-            
+            // คำนวณแคลอรี่และสารอาหาร
+            let calories, protein = 0, sodium = 0, carbs = 0, fat = 0, fiber = 0, sugar = 0;
+
+            // ตรวจสอบการกรอกสารอาหารด้วยตนเอง
+            const manualProteinEl = document.getElementById('manualProtein');
+            const manualCarbsEl = document.getElementById('manualCarbs');
+            const manualFatEl = document.getElementById('manualFat');
+            const manualFiberEl = document.getElementById('manualFiber');
+            const manualSugarEl = document.getElementById('manualSugar');
+            const manualSodiumEl = document.getElementById('manualSodium');
+
+            const manualProtein = manualProteinEl ? parseFloat(manualProteinEl.value) : null;
+            const manualCarbs = manualCarbsEl ? parseFloat(manualCarbsEl.value) : null;
+            const manualFat = manualFatEl ? parseFloat(manualFatEl.value) : null;
+            const manualFiber = manualFiberEl ? parseFloat(manualFiberEl.value) : null;
+            const manualSugar = manualSugarEl ? parseFloat(manualSugarEl.value) : null;
+            const manualSodium = manualSodiumEl ? parseFloat(manualSodiumEl.value) : null;
+
             if (manualCalories) {
+                // ใช้ค่าแคลอรี่ที่กรอกเอง
                 calories = manualCalories * amount;
+    
+                // ใช้สารอาหารที่กรอกเองหรือประมาณการ
+                protein = manualProtein ? manualProtein * amount : (calories * 0.2 / 4); // 20% ของแคลอรี่
+                carbs = manualCarbs ? manualCarbs * amount : (calories * 0.5 / 4); // 50% ของแคลอรี่
+                fat = manualFat ? manualFat * amount : (calories * 0.3 / 9); // 30% ของแคลอรี่
+                fiber = manualFiber ? manualFiber * amount : (carbs * 0.1); // ประมาณ 10% ของคาร์บ
+                sugar = manualSugar ? manualSugar * amount : (carbs * 0.3); // ประมาณ 30% ของคาร์บ
+                sodium = manualSodium ? manualSodium * amount : 300 * amount; // ค่าเฉลี่ย
+    
             } else if (foodDatabase[foodName]) {
+                // ใช้ข้อมูลจากฐานข้อมูล แต่ให้ความสำคัญกับที่กรอกเอง
                 const foodData = foodDatabase[foodName];
                 calories = foodData.calories * amount;
-                protein = foodData.protein * amount;
-                sodium = foodData.sodium * amount;
+    
+                protein = manualProtein ? manualProtein * amount : foodData.protein * amount;
+                carbs = manualCarbs ? manualCarbs * amount : (foodData.carbs || 0) * amount;
+                fat = manualFat ? manualFat * amount : (foodData.fat || 0) * amount;
+                fiber = manualFiber ? manualFiber * amount : (foodData.fiber || 0) * amount;
+                sugar = manualSugar ? manualSugar * amount : (foodData.sugar || 0) * amount;
+                sodium = manualSodium ? manualSodium * amount : foodData.sodium * amount;
+    
             } else {
-                // ประมาดการถ้าไม่มีในฐานข้อมูล
+                // ประมาณการทั้งหมด หากไม่มีในฐานข้อมูล
                 calories = 150 * amount; // ค่าเฉลี่ย
-                protein = 5 * amount;
-                sodium = 300 * amount;
+    
+                protein = manualProtein ? manualProtein * amount : 5 * amount;
+                carbs = manualCarbs ? manualCarbs * amount : 20 * amount;
+                fat = manualFat ? manualFat * amount : 5 * amount;
+                fiber = manualFiber ? manualFiber * amount : 2 * amount;
+                sugar = manualSugar ? manualSugar * amount : 3 * amount;
+                sodium = manualSodium ? manualSodium * amount : 300 * amount;
             }
 
             const foodItem = {
@@ -2625,16 +2802,29 @@
                 calories: Math.round(calories),
                 protein: Math.round(protein),
                 sodium: Math.round(sodium),
+                carbs: Math.round(carbs),
+                fat: Math.round(fat),
+                fiber: Math.round(fiber),
+                sugar: Math.round(sugar),
                 timestamp: new Date().toISOString()
             };
 
             window.dailyFoodLog[userKey][today][mealType].push(foodItem);
             
-            // เคลียร์ฟอร์ม
-            foodNameEl.value = '';
-            amountEl.value = '1';
-            if (manualCaloriesEl) manualCaloriesEl.value = '';
-            hideSuggestions();
+           // เคลียร์ฟอร์ม
+           foodNameEl.value = '';
+           amountEl.value = '1';
+           if (manualCaloriesEl) manualCaloriesEl.value = '';
+
+           // เคลียร์ช่องสารอาหารเพิ่มเติม
+           if (manualProteinEl) manualProteinEl.value = '';
+           if (manualCarbsEl) manualCarbsEl.value = '';
+           if (manualFatEl) manualFatEl.value = '';
+           if (manualFiberEl) manualFiberEl.value = '';
+           if (manualSugarEl) manualSugarEl.value = '';
+           if (manualSodiumEl) manualSodiumEl.value = '';
+
+           hideSuggestions();
 
             // Save and update displays
             if (window.saveToStorage) window.saveToStorage();
@@ -2669,7 +2859,14 @@
                         <div class="food-item">
                             <div class="food-info">
                                 <div class="food-name">${food.name}</div>
-                                <div class="food-details">${food.amount} ${food.unit} - ${Math.round(food.calories)} แคลอรี่, ${Math.round(food.protein)}g โปรตีน, ${Math.round(food.sodium)}mg โซเดียม</div>
+                                <div class="food-details">${food.amount} ${food.unit} - ${Math.round(food.calories)} แคลอรี่</div>
+                                <div class="food-details" style="font-size: 12px; color: #888; margin-top: 2px;">
+                                    โปรตีน: ${Math.round(food.protein || 0)}g | 
+                                    คาร์บ: ${Math.round(food.carbs || 0)}g | 
+                                    ไขมัน: ${Math.round(food.fat || 0)}g | 
+                                    ใยอาหาร: ${Math.round(food.fiber || 0)}g
+                                    ${food.sodium ? `| โซเดียม: ${Math.round(food.sodium)}mg` : ''}
+                                </div>
                             </div>
                             <button class="btn btn-danger btn-small" onclick="removeFood('${mealType}', ${idx})">ลบ</button>
                         </div>
@@ -2700,20 +2897,25 @@
 
         // ฟังก์ชันอัปเดตสถิติรายวัน
         function updateDailyStats() {
-            const userKey = window.currentUser || 'demo';
-            const today = new Date().toISOString().split('T')[0];
-            const todayLog = window.dailyFoodLog[userKey]?.[today] || {
-                breakfast: [], lunch: [], dinner: [], snack: []
-            };
-            
-            let totalCalories = 0, totalProtein = 0, totalSodium = 0;
-            
+	    const userKey = window.currentUser || 'demo';
+	    const today = new Date().toISOString().split('T')[0];
+	    const todayLog = window.dailyFoodLog[userKey]?.[today] || {
+	        breakfast: [], lunch: [], dinner: [], snack: []
+	    };
+    
+	    let totalCalories = 0, totalProtein = 0, totalSodium = 0;
+	    let totalCarbs = 0, totalFat = 0, totalFiber = 0, totalSugar = 0;
+    
             Object.values(todayLog).forEach(meal => {
                 if (Array.isArray(meal)) {
                     meal.forEach(food => {
                         totalCalories += food.calories || 0;
                         totalProtein += food.protein || 0;
                         totalSodium += food.sodium || 0;
+                        totalCarbs += food.carbs || 0;
+                        totalFat += food.fat || 0;
+                        totalFiber += food.fiber || 0;
+                        totalSugar += food.sugar || 0;
                     });
                 }
             });
@@ -2721,32 +2923,82 @@
             const profile = window.userData[userKey]?.profile;
             const targetCalories = profile?.targetCalories || 2000;
             const remainingCalories = Math.max(0, targetCalories - totalCalories);
+    
+            // คำนวณเป้าหมายสารอาหารตามข้อมูลส่วนตัว
+            const weight = profile?.weight || 70;
+            const age = profile?.age || 25;
+            const gender = profile?.gender || 'male';
+    
+            // เป้าหมายสารอาหาร (ตามแนวทางโภชนาการ)
+            const proteinTarget = Math.round(weight * 1.2); // 1.2g ต่อ kg น้ำหนักตัว
+            const sodiumTarget = 2300; // mg ต่อวัน (แนวทาง WHO)
+            const carbsTarget = Math.round(targetCalories * 0.5 / 4); // 50% ของแคลอรี่
+            const fatTarget = Math.round(targetCalories * 0.3 / 9); // 30% ของแคลอรี่
+            const fiberTarget = age < 50 ? (gender === 'male' ? 38 : 25) : (gender === 'male' ? 30 : 21); // g ต่อวัน
+            const sugarTarget = Math.round(targetCalories * 0.1 / 4); // ไม่เกิน 10% ของแคลอรี่
 
             // Update stat cards
-            const caloriesConsumedEl = document.getElementById('caloriesConsumed');
-            const caloriesRemainingEl = document.getElementById('caloriesRemaining');
-            const proteinConsumedEl = document.getElementById('proteinConsumed');
-            const sodiumConsumedEl = document.getElementById('sodiumConsumed');
+            const elements = {
+                caloriesConsumed: Math.round(totalCalories),
+                caloriesRemaining: Math.round(remainingCalories),
+                proteinConsumed: Math.round(totalProtein) + 'g',
+                sodiumConsumed: Math.round(totalSodium) + 'mg',
+                carbsConsumed: Math.round(totalCarbs) + 'g',
+                fatConsumed: Math.round(totalFat) + 'g',
+                fiberConsumed: Math.round(totalFiber) + 'g',
+                sugarConsumed: Math.round(totalSugar) + 'g'
+            };
 
-            if (caloriesConsumedEl) caloriesConsumedEl.textContent = Math.round(totalCalories);
-            if (caloriesRemainingEl) caloriesRemainingEl.textContent = Math.round(remainingCalories);
-            if (proteinConsumedEl) proteinConsumedEl.textContent = Math.round(totalProtein) + 'g';
-            if (sodiumConsumedEl) sodiumConsumedEl.textContent = Math.round(totalSodium) + 'mg';
+            // Update targets
+            const targets = {
+                proteinTarget: `เป้าหมาย: ${proteinTarget}g`,
+                sodiumTarget: `เป้าหมาย: ${sodiumTarget}mg`,
+                carbsTarget: `เป้าหมาย: ${carbsTarget}g`,
+                fatTarget: `เป้าหมาย: ${fatTarget}g`,
+                fiberTarget: `เป้าหมาย: ${fiberTarget}g`,
+                sugarTarget: `เป้าหมาย: ${sugarTarget}g`
+            };
 
-            // อัปเดต progress bar
-            const progress = Math.min((totalCalories / targetCalories) * 100, 100);
+            // Update progress bars
+            const progress = {
+                proteinProgress: Math.min((totalProtein / proteinTarget) * 100, 100),
+                sodiumProgress: Math.min((totalSodium / sodiumTarget) * 100, 100),
+                carbsProgress: Math.min((totalCarbs / carbsTarget) * 100, 100),
+                fatProgress: Math.min((totalFat / fatTarget) * 100, 100),
+                fiberProgress: Math.min((totalFiber / fiberTarget) * 100, 100),
+                sugarProgress: Math.min((totalSugar / sugarTarget) * 100, 100)
+            };
+
+            // Apply updates to DOM
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value;
+            });
+
+            Object.entries(targets).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value;
+            });
+
+            Object.entries(progress).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.style.width = value + '%';
+            });
+
+            // อัปเดต progress bar หลัก
+            const mainProgress = Math.min((totalCalories / targetCalories) * 100, 100);
             const calorieProgressEl = document.getElementById('calorieProgress');
-            if (calorieProgressEl) calorieProgressEl.style.width = progress + '%';
+            if (calorieProgressEl) calorieProgressEl.style.width = mainProgress + '%';
 
             // อัปเดต progress ring
             const progressRingEl = document.getElementById('progressRing');
             const progressTextEl = document.getElementById('progressText');
-            
+    
             if (progressRingEl && progressTextEl) {
                 const circumference = 2 * Math.PI * 50; // radius = 50
-                const offset = circumference - (progress / 100) * circumference;
+                const offset = circumference - (mainProgress / 100) * circumference;
                 progressRingEl.style.strokeDashoffset = offset;
-                progressTextEl.textContent = Math.round(progress) + '%';
+                progressTextEl.textContent = Math.round(mainProgress) + '%';
             }
         }
 
